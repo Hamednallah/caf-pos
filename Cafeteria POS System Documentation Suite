@@ -1,0 +1,439 @@
+# Cafeteria POS System Documentation Suite
+
+## 1. Software Requirements Specification (SRS)
+
+### 1.1 Introduction
+
+**Purpose:** Define the functional and non-functional requirements for the Cafeteria POS System.
+
+**Scope:** A desktop-based POS system tailored for small cafeterias, with support for touch-screen usage, internationalization, and configurable deployment.
+
+**Audience:** Development agents (Cursor, Jules, Google CLI), testers, deployment engineers.
+
+**Acronyms:**
+
+* POS: Point of Sale
+* SDG: Sudanese Pound
+* LTR: Left-to-Right
+* RTL: Right-to-Left
+* i18n: Internationalization
+* l10n: Localization
+
+### 1.2 Overall Description
+
+**Product Perspective:** Standalone JavaFX application with PostgreSQL backend.
+
+**Product Functions:** Authentication, Menu Management, Order Processing, Shift Management, Expense Management, Reporting.
+
+**User Characteristics:**
+
+* Cashiers: Basic computer skills.
+* Admins: Moderate technical literacy.
+
+**Assumptions and Dependencies:**
+
+* Printer and database must be operational.
+* Localized configuration files must be present.
+
+### 1.3 Functional Requirements
+
+**FR-1: Authentication & User Management**
+
+* FR-1.1: Secure login using hashed password
+* FR-1.2: Admin can perform full CRUD on users
+* FR-1.3: Users can change own passwords
+
+**FR-2: Item & Category Management**
+
+* FR-2.1: CRUD on item categories
+* FR-2.2: CRUD on items with optional image path
+
+**FR-3: Order Processing & Sales**
+
+* FR-3.1: Create, modify, and finalize orders
+* FR-3.2: Apply discounts
+* FR-3.3: Support cash and manual bank payments
+* FR-3.4: Reprint last/any receipt
+
+**FR-4: Shift Management**
+
+* FR-4.1: Start/Pause/Resume/End Shift
+* FR-4.2: Generate shift report
+
+**FR-5: Expense Management**
+
+* FR-5.1: Record expenses with category
+* FR-5.2: Admin manages expense categories
+
+**FR-6: Reporting**
+
+* FR-6.1: Generate daily/weekly/custom reports
+* FR-6.2: Profit calculation: Revenue - Expenses
+
+### 1.4 Non-Functional Requirements
+
+* **Performance:** < 5s order processing, < 10s report generation
+* **Reliability:** Atomic transactions, error handling
+* **Security:** Hashed passwords, RBAC
+* **UI/UX:** Touch-compatible, minimalist
+* **Internationalization:** English/Arabic, LTR/RTL
+
+### 1.5 Interface Requirements
+
+* **Printer:** ESC/POS 80mm thermal printer
+* **Database:** PostgreSQL v14+
+
+## 2. System Architecture Document
+
+### 2.1 Architecture Overview
+
+**Pattern:** Layered + MVVM for UI
+
+**Layers:**
+
+* UI Layer (JavaFX with FXML & Controllers)
+* ViewModel Layer (observable bindings)
+* Service Layer (business logic)
+* Repository Layer (JPA/Hibernate)
+* Database (PostgreSQL)
+
+### 2.2 Components
+
+* `AuthService`, `UserService`
+* `OrderService`, `ShiftService`
+* `ExpenseService`, `ReportService`
+
+### 2.3 Deployment Strategy
+
+* Distributed as a native Windows installer via `jpackage`
+* Bundled JRE, PostgreSQL service required or bundled
+
+## 3. PostgreSQL Full Database Script
+
+```sql
+-- Create roles
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+INSERT INTO roles(name) VALUES ('Admin'), ('Cashier');
+
+-- Users
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    full_name VARCHAR(100),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role_id INTEGER REFERENCES roles(id)
+);
+
+-- Categories
+CREATE TABLE item_categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT
+);
+
+-- Items
+CREATE TABLE items (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+    price NUMERIC(10,2) NOT NULL,
+    category_id INTEGER REFERENCES item_categories(id),
+    image_path TEXT
+);
+
+-- Orders
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    cashier_id INTEGER REFERENCES users(id),
+    datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    discount NUMERIC(10,2) DEFAULT 0,
+    payment_method VARCHAR(20) CHECK (payment_method IN ('Cash', 'Bank')),
+    voided BOOLEAN DEFAULT FALSE
+);
+
+-- Order Items
+CREATE TABLE order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER REFERENCES orders(id),
+    item_id INTEGER REFERENCES items(id),
+    quantity INTEGER NOT NULL
+);
+
+-- Shifts
+CREATE TABLE shifts (
+    id SERIAL PRIMARY KEY,
+    cashier_id INTEGER REFERENCES users(id),
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
+    paused BOOLEAN DEFAULT FALSE,
+    initial_float NUMERIC(10,2)
+);
+
+-- Expenses
+CREATE TABLE expense_categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE expenses (
+    id SERIAL PRIMARY KEY,
+    employee_id INTEGER REFERENCES users(id),
+    category_id INTEGER REFERENCES expense_categories(id),
+    amount NUMERIC(10,2),
+    description TEXT,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## 4. PlantUML Diagrams
+
+### 4.1 Use Case Diagram
+
+```plantuml
+@startuml
+actor Cashier
+actor Admin
+
+Cashier --> (Login)
+Cashier --> (Start Shift)
+Cashier --> (Process Order)
+Cashier --> (Record Expense)
+Cashier --> (End Shift)
+Admin --> (Generate Reports)
+Admin --> (Manage Users)
+Admin --> (Manage Items & Categories)
+@enduml
+```
+
+### 4.2 Class Diagram
+
+```plantuml
+@startuml
+class User { id, fullName, username, passwordHash, role }
+class Role { id, name }
+class Item { id, name, description, price, imagePath }
+class ItemCategory { id, name, description }
+class Order { id, datetime, cashier, discount, paymentMethod }
+class OrderItem { id, order, item, quantity }
+class Shift { id, cashier, startTime, endTime, initialFloat }
+class Expense { id, employee, category, amount, description }
+
+User --> Role
+Item --> ItemCategory
+Order --> User
+OrderItem --> Order
+OrderItem --> Item
+Shift --> User
+Expense --> User
+Expense --> ExpenseCategory
+@enduml
+```
+
+### 4.3 Sequence Diagram (Order Processing)
+
+```plantuml
+@startuml
+actor Cashier
+participant UI
+participant OrderService
+participant Repository
+
+Cashier -> UI: Add item to order
+UI -> OrderService: addItem(itemId, qty)
+OrderService -> Repository: findItem(itemId)
+Repository --> OrderService: Item
+OrderService --> UI: Updated Order
+@enduml
+```
+
+### 4.4 Activity Diagram (Shift Management)
+
+```plantuml
+@startuml
+start
+:Start Shift;
+if (Paused?) then (yes)
+  :Resume Shift;
+else
+  :Continue;
+endif
+:Process Orders;
+:Record Expenses;
+:End Shift;
+:Generate Report;
+stop
+@enduml
+```
+
+### 4.5 Component Diagram
+
+```plantuml
+@startuml
+[UI Layer] --> [ViewModel Layer]
+[ViewModel Layer] --> [Service Layer]
+[Service Layer] --> [Repository Layer]
+[Repository Layer] --> [PostgreSQL]
+@enduml
+```
+
+### 4.6 Deployment Diagram
+
+```plantuml
+@startuml
+node DesktopApp {
+  component UI
+  component BusinessLogic
+  component DatabaseAccess
+}
+node DBServer {
+  database PostgreSQL
+}
+UI --> BusinessLogic
+BusinessLogic --> DatabaseAccess
+DatabaseAccess --> PostgreSQL
+@enduml
+```
+
+## 5. UI/UX Considerations Document
+
+### 5.1 Target Users
+
+* Cashiers: Fast, intuitive interactions
+* Admins: Detail-rich dashboards
+
+### 5.2 Visual Theme
+
+* Flat design, high-contrast buttons
+* Color-coded categories and actions
+
+### 5.3 Layout Principles
+
+* Main dashboard: collapsible side menu, top header
+* Order screen: category tabs, item tiles, receipt panel
+
+### 5.4 Typography
+
+* Sans-serif fonts (e.g., Roboto)
+* Large font sizes for touch readability
+
+### 5.5 Forms Best Practices
+
+* Label alignment per language direction
+* Validation messages below fields
+
+### 5.6 Key Screens
+
+* Login Screen: Username, Password, Language Toggle
+* Main Dashboard: Shift data, nav links
+* Order Screen: Menu, Cart, Finalize
+* Expense Entry: Amount, Category, Description
+
+## 6. Internationalization & Localization (i18n & l10n) Strategy
+
+### 6.1 Externalization
+
+* Use Java ResourceBundles (i18n\_en.properties, i18n\_ar.properties)
+* UI controls reference keys, not hardcoded strings
+
+### 6.2 RTL Support
+
+* Detect locale and adjust JavaFX `Node.setNodeOrientation(RIGHT_TO_LEFT)`
+* Align text and icons contextually
+
+### 6.3 Currency & Date Formatting
+
+* Use `NumberFormat.getCurrencyInstance(locale)`
+* Use `DateTimeFormatter.ofLocalizedDateTime()`
+
+### 6.4 Database Localization
+
+* Items and categories table may include multilingual fields (e.g., name\_en, name\_ar)
+
+## 7. Implementation Plan
+
+### Sprint 0: Setup
+
+* Repo scaffolding, tech validation, schema modeling
+* Setup Maven/Gradle, JavaFX, JPA, DB connection
+
+### Sprint 1: Authentication & User Management
+
+* Login screen UI + logic
+* RBAC enforcement
+* User CRUD screens for Admin
+
+### Sprint 2: Item & Category Management
+
+* Category and item CRUD screens
+* Image upload support
+* Data validation
+
+### Sprint 3: Order Processing Core
+
+* Order UI, cart logic
+* Discounts, payments
+* Persist order data
+
+### Sprint 4: Receipt Printing
+
+* ESC/POS output format
+* Print last + history receipts
+
+### Sprint 5: Shift Management
+
+* Shift start/pause/end logic
+* UI integration
+* Shift reports
+
+### Sprint 6: Expense Management
+
+* Record expense form
+* Expense category management
+
+### Sprint 7: Reporting
+
+* Revenue/Expense/Profit reports
+* Filters by time/cashier/category
+
+### Sprint 8: i18n/l10n
+
+* Resource bundle integration
+* RTL/LTR switching
+* Currency formatting
+
+### Sprint 9: Final Configurability + Installer
+
+* Brandable config (name, logo, address)
+* Generate Windows installer with jpackage
+
+### Sprint 10: QA & Stabilization
+
+* Test scripts
+* Bug fixing
+* Performance profiling
+
+### Changelog & Context Tracking
+
+* Each module/class/method documented in `CHANGELOG.md`
+* Task matrix in `progress.json` (status, links, owner, sprint)
+* GPA matrix (Feature vs Sprint vs Agent) in `progress_matrix.csv`
+
+## 8. Technology Stack Proposal
+
+| Component    | Choice           | Justification                      |
+| ------------ | ---------------- | ---------------------------------- |
+| Language     | Java 21          | Modern features, long-term support |
+| UI Framework | JavaFX (OpenJFX) | Native feel, touch support         |
+| Persistence  | JPA + Hibernate  | Standard ORM for Java              |
+| Database     | PostgreSQL v14+  | Reliability, strong type system    |
+| Build Tool   | Maven            | Dependency & lifecycle management  |
+| Packaging    | jpackage         | Native Windows installers          |
+
+---
+
+**Note:** All documentation artifacts must be stored under `/docs` and versioned along with `/src`. Agents must follow modular design patterns and write inline Javadoc-style comments. Auto-generated feature matrices, logs, and changelogs must be regularly updated.
+
+End of Documentation Suite.
