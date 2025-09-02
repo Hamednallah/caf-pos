@@ -1,0 +1,9 @@
+com/yourcompany/cafeteria/dao/OrdersDAOTest.class
+com/yourcompany/cafeteria/util/TestDatabase.class
+com/yourcompany/cafeteria/dao/SettingsDAOTest.class
+com/yourcompany/cafeteria/dao/ReportsDAOTest.class
+com/yourcompany/cafeteria/dao/UsersDAOTest.class
+com/yourcompany/cafeteria/dao/ItemsDAOTest.class
+com/yourcompany/cafeteria/dao/ExpensesDAOTest.class
+com/yourcompany/cafeteria/dao/ShiftsDAOTest.class
+com/yourcompany/cafeteria/service/UsersServiceTest.class

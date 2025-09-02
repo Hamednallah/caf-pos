@@ -1,0 +1,9 @@
+/app/src/test/java/com/yourcompany/cafeteria/dao/ExpensesDAOTest.java
+/app/src/test/java/com/yourcompany/cafeteria/dao/ItemsDAOTest.java
+/app/src/test/java/com/yourcompany/cafeteria/dao/OrdersDAOTest.java
+/app/src/test/java/com/yourcompany/cafeteria/dao/ReportsDAOTest.java
+/app/src/test/java/com/yourcompany/cafeteria/dao/SettingsDAOTest.java
+/app/src/test/java/com/yourcompany/cafeteria/dao/ShiftsDAOTest.java
+/app/src/test/java/com/yourcompany/cafeteria/dao/UsersDAOTest.java
+/app/src/test/java/com/yourcompany/cafeteria/service/UsersServiceTest.java
+/app/src/test/java/com/yourcompany/cafeteria/util/TestDatabase.java

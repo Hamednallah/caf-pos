@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.yourcompany.cafeteria.ui.ItemsController" spacing="8"><Label text="Items"/><TableView fx:id="itemsTable"/><Button text="Add Item" onAction="#handleAddItem"/></VBox>
