@@ -31,3 +31,4 @@
 /app/src/main/java/com/yourcompany/cafeteria/ui/ShiftsController.java
 /app/src/main/java/com/yourcompany/cafeteria/util/DataSourceProvider.java
 /app/src/main/java/com/yourcompany/cafeteria/util/ReceiptPrinter.java
+/app/src/main/java/com/yourcompany/cafeteria/util/SessionManager.java
