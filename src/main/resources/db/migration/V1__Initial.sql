@@ -7,4 +7,4 @@ CREATE TABLE shift(id IDENTITY PRIMARY KEY, cashier_id INT, started_at TIMESTAMP
 CREATE TABLE "order"(id IDENTITY PRIMARY KEY, cashier_id INT, shift_id INT, total_amount DECIMAL(18,2), discount_amount DECIMAL(18,2), status VARCHAR(32), payment_method VARCHAR(32), payment_confirmed BOOLEAN DEFAULT FALSE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE order_item(id IDENTITY PRIMARY KEY, order_id INT, item_id INT, quantity INT, line_total DECIMAL(18,2));
 CREATE TABLE expense(id IDENTITY PRIMARY KEY, amount DECIMAL(18,2), description VARCHAR(512), category VARCHAR(100), recorded_by INT, recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, shift_id INT);
-CREATE TABLE settings(key VARCHAR(128) PRIMARY KEY, value VARCHAR(1024));
+CREATE TABLE settings("key" VARCHAR(128) PRIMARY KEY, "value" VARCHAR(1024));
