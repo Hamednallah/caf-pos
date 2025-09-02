@@ -1,0 +1,1 @@
+package com.yourcompany.cafeteria.ui; import javafx.fxml.FXML; import javafx.scene.control.TextArea; public class ReceiptController { @FXML private TextArea receiptArea; public void setText(String t){ receiptArea.setText(t); } }

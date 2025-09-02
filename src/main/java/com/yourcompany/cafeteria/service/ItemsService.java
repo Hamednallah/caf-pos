@@ -1,0 +1,3 @@
+package com.yourcompany.cafeteria.service;
+import com.yourcompany.cafeteria.dao.ItemsDAO; import com.yourcompany.cafeteria.model.Item; import java.sql.Connection; import java.util.List;
+public class ItemsService { private final ItemsDAO dao; public ItemsService(Connection c){ this.dao=new ItemsDAO(c);} public int add(Item i) throws Exception { return dao.insert(i); } public List<Item> listAll() throws Exception { return dao.listAll(); } public Item findById(int id) throws Exception { return dao.findById(id); } public void update(Item it) throws Exception { dao.update(it); } public void delete(int id) throws Exception { dao.delete(id); } }

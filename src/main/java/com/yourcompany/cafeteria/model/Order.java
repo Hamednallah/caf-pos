@@ -1,0 +1,2 @@
+package com.yourcompany.cafeteria.model; import java.math.BigDecimal; import java.time.LocalDateTime; import java.util.List;
+public class Order { public Integer id; public Integer cashierId; public Integer shiftId; public LocalDateTime createdAt; public BigDecimal totalAmount; public BigDecimal discountAmount; public String status; public String paymentMethod; public boolean paymentConfirmed; public List<OrderItem> items; }
