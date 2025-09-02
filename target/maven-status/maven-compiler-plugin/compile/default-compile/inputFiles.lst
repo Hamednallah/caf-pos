@@ -1,3 +1,4 @@
+/app/src/main/java/com/yourcompany/cafeteria/MainApp.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/ExpensesDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/ItemsDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/OrderItemsDAO.java
@@ -19,10 +20,14 @@
 /app/src/main/java/com/yourcompany/cafeteria/service/SettingsService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/ShiftService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/UsersService.java
+/app/src/main/java/com/yourcompany/cafeteria/ui/ExpensesController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ItemsController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/LoginController.java
+/app/src/main/java/com/yourcompany/cafeteria/ui/MainController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ReceiptController.java
+/app/src/main/java/com/yourcompany/cafeteria/ui/ReportsController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/SalesController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/SettingsController.java
+/app/src/main/java/com/yourcompany/cafeteria/ui/ShiftsController.java
 /app/src/main/java/com/yourcompany/cafeteria/util/DataSourceProvider.java
 /app/src/main/java/com/yourcompany/cafeteria/util/ReceiptPrinter.java
