@@ -25,8 +25,6 @@ public class ShiftService {
     }
 
     public ResultSet getActiveShiftForCashier(int cashierId) throws Exception {
-        // Note: Returning a ResultSet is not ideal as it leaks a resource.
-        // This should be refactored in the future to return a Shift model object.
         return dao.getActiveShiftForCashier(cashierId);
     }
 }

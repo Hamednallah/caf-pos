@@ -22,8 +22,13 @@ class ShiftServiceTest {
     void setUp() throws SQLException {
         DataSourceProvider.setURL("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1");
         connection = DataSourceProvider.getConnection();
+
+        // Clean the database before each test
+        try (java.sql.Statement s = connection.createStatement()) {
+            s.execute("DROP ALL OBJECTS");
+        }
+
         Flyway flyway = Flyway.configure().dataSource(DataSourceProvider.getDataSource()).load();
-        flyway.clean();
         flyway.migrate();
         shiftService = new ShiftService(connection);
     }

@@ -15,10 +15,10 @@ public class OrdersService {
         if (o == null) {
             throw new IllegalArgumentException("Order cannot be null.");
         }
-        if (o.getItems() == null || o.getItems().isEmpty()) {
+        if (o.items == null || o.items.isEmpty()) {
             throw new IllegalArgumentException("Order must have at least one item.");
         }
-        if (o.getTotalAmount() == null || o.getTotalAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (o.totalAmount == null || o.totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Order total amount must be positive.");
         }
         return dao.createOrderTransactional(o);

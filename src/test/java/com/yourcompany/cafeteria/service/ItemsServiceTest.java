@@ -23,8 +23,13 @@ class ItemsServiceTest {
     void setUp() throws SQLException {
         DataSourceProvider.setURL("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1");
         connection = DataSourceProvider.getConnection();
+
+        // Clean the database before each test
+        try (java.sql.Statement s = connection.createStatement()) {
+            s.execute("DROP ALL OBJECTS");
+        }
+
         Flyway flyway = Flyway.configure().dataSource(DataSourceProvider.getDataSource()).load();
-        flyway.clean();
         flyway.migrate();
         itemsService = new ItemsService(connection);
     }
@@ -86,16 +91,29 @@ class ItemsServiceTest {
 
     @Test
     void testListAllItems() throws Exception {
-        itemsService.add(new Item("Item 1", "Desc 1", new BigDecimal("1.00")));
-        itemsService.add(new Item("Item 2", "Desc 2", new BigDecimal("2.00")));
+        Item item1 = new Item();
+        item1.setName("Test Item 1");
+        item1.setDescription("Desc 1");
+        item1.setPrice(new BigDecimal("1.00"));
+        itemsService.add(item1);
 
+        Item item2 = new Item();
+        item2.setName("Test Item 2");
+        item2.setDescription("Desc 2");
+        item2.setPrice(new BigDecimal("2.00"));
+        itemsService.add(item2);
+
+        // 3 from seed + 2 from this test
         List<Item> items = itemsService.listAll();
-        assertEquals(2, items.size());
+        assertEquals(5, items.size());
     }
 
     @Test
     void testDeleteItem() throws Exception {
-        Item item = new Item("Delete Me", "Desc", new BigDecimal("5.00"));
+        Item item = new Item();
+        item.setName("Delete Me");
+        item.setDescription("Desc");
+        item.setPrice(new BigDecimal("5.00"));
         int id = itemsService.add(item);
 
         itemsService.delete(id);

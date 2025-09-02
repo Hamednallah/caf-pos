@@ -25,8 +25,6 @@ public class ExpenseService {
     }
 
     public ResultSet getExpensesByShift(int shiftId) throws Exception {
-        // Note: Returning a ResultSet is not ideal as it leaks a resource.
-        // This should be refactored in the future to return a list of Expense model objects.
         return dao.listByShift(shiftId);
     }
 }

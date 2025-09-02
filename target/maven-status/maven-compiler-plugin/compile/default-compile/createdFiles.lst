@@ -1,3 +1,5 @@
+com/yourcompany/cafeteria/service/ReportsService.class
+com/yourcompany/cafeteria/service/ExpenseService.class
 com/yourcompany/cafeteria/ui/SettingsController.class
 com/yourcompany/cafeteria/ui/SalesController.class
 com/yourcompany/cafeteria/service/ItemsService.class
@@ -15,6 +17,7 @@ com/yourcompany/cafeteria/dao/ItemsDAO.class
 com/yourcompany/cafeteria/ui/ItemsController.class
 com/yourcompany/cafeteria/model/Order.class
 com/yourcompany/cafeteria/ui/ReceiptController.class
+com/yourcompany/cafeteria/service/ShiftService.class
 com/yourcompany/cafeteria/dao/ReportsDAO.class
 com/yourcompany/cafeteria/service/PrinterService.class
 com/yourcompany/cafeteria/dao/ShiftsDAO.class

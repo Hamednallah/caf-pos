@@ -27,8 +27,13 @@ class OrdersServiceTest {
     void setUp() throws SQLException {
         DataSourceProvider.setURL("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1");
         connection = DataSourceProvider.getConnection();
+
+        // Clean the database before each test
+        try (java.sql.Statement s = connection.createStatement()) {
+            s.execute("DROP ALL OBJECTS");
+        }
+
         Flyway flyway = Flyway.configure().dataSource(DataSourceProvider.getDataSource()).load();
-        flyway.clean();
         flyway.migrate();
         ordersService = new OrdersService(connection);
         itemsService = new ItemsService(connection);
@@ -43,38 +48,47 @@ class OrdersServiceTest {
 
     @Test
     void testCreateValidOrder() throws Exception {
-        Item item = new Item("Test Item", "Desc", new BigDecimal("10.00"));
+        Item item = new Item();
+        item.setName("Valid Order Item");
+        item.setDescription("Desc");
+        item.setPrice(new BigDecimal("10.00"));
         int itemId = itemsService.add(item);
 
         Order order = new Order();
-        order.setCashierId(1);
-        order.setTotalAmount(new BigDecimal("10.00"));
+        order.cashierId = 1;
+        order.totalAmount = new BigDecimal("10.00");
         OrderItem orderItem = new OrderItem();
         orderItem.setItemId(itemId);
         orderItem.setQuantity(1);
         orderItem.setLineTotal(new BigDecimal("10.00"));
-        order.setItems(Collections.singletonList(orderItem));
+        order.items = Collections.singletonList(orderItem);
 
         int orderId = ordersService.create(order);
         assertTrue(orderId > 0);
     }
 
     @Test
-    void testCreateInvalidOrder() {
+    void testCreateInvalidOrder() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> ordersService.create(null));
 
         Order order1 = new Order();
-        order1.setItems(new ArrayList<>());
-        order1.setTotalAmount(new BigDecimal("10.00"));
+        order1.items = new ArrayList<>();
+        order1.totalAmount = new BigDecimal("10.00");
         assertThrows(IllegalArgumentException.class, () -> ordersService.create(order1));
+
+        Item item = new Item();
+        item.setName("Invalid Order Item");
+        item.setDescription("Desc");
+        item.setPrice(new BigDecimal("10.00"));
+        int itemId = itemsService.add(item);
 
         Order order2 = new Order();
         OrderItem orderItem = new OrderItem();
-        orderItem.setItemId(1);
+        orderItem.setItemId(itemId);
         orderItem.setQuantity(1);
         orderItem.setLineTotal(new BigDecimal("10.00"));
-        order2.setItems(Collections.singletonList(orderItem));
-        order2.setTotalAmount(BigDecimal.ZERO);
+        order2.items = Collections.singletonList(orderItem);
+        order2.totalAmount = BigDecimal.ZERO;
         assertThrows(IllegalArgumentException.class, () -> ordersService.create(order2));
     }
 }
