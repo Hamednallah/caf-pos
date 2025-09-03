@@ -22,27 +22,7 @@ public class ShiftsController {
 
     @FXML
     public void initialize() {
-        checkForActiveShift();
         updateUIState();
-    }
-
-    private void checkForActiveShift() {
-        if (SessionManager.isShiftActive()) {
-            return;
-        }
-
-        try (var c = DataSourceProvider.getConnection()) {
-            ShiftService shiftService = new ShiftService(c);
-            Integer cashierId = SessionManager.getCurrentCashierId();
-            if (cashierId != null) {
-                ResultSet rs = shiftService.getActiveShiftForCashier(cashierId);
-                if (rs.next()) {
-                    SessionManager.setCurrentShiftId(rs.getInt("id"));
-                }
-            }
-        } catch (Exception e) {
-            showError("Database Error", "Failed to check for active shift.", e.getMessage());
-        }
     }
 
     private void updateUIState() {

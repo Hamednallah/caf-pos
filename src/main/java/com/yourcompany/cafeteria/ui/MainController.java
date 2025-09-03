@@ -8,6 +8,11 @@ import javafx.scene.layout.BorderPane;
 import java.io.IOException;
 import java.net.URL;
 
+import com.yourcompany.cafeteria.service.StartupService;
+import com.yourcompany.cafeteria.util.DataSourceProvider;
+
+import java.sql.SQLException;
+
 public class MainController {
 
     @FXML
@@ -15,6 +20,15 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        // Perform startup checks before loading any views
+        try (var c = DataSourceProvider.getConnection()) {
+            StartupService startupService = new StartupService(c);
+            startupService.checkAndResumeActiveShift();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // In a real app, you would show a fatal error dialog and possibly exit.
+        }
+
         // Load the default view on startup
         showSalesView();
     }

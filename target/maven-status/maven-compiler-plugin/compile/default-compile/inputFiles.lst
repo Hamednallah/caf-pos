@@ -20,6 +20,7 @@
 /app/src/main/java/com/yourcompany/cafeteria/service/ReportsService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/SettingsService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/ShiftService.java
+/app/src/main/java/com/yourcompany/cafeteria/service/StartupService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/UsersService.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ExpensesController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ItemsController.java
