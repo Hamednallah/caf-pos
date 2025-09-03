@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.MainController"
+            xmlns="http://javafx.com/javafx/21" prefHeight="768.0" prefWidth="1366.0">
+    <left>
+        <VBox spacing="10" style="-fx-padding: 10; -fx-background-color: #e0e0e0;" alignment="TOP_CENTER">
+            <children>
+                <Button text="Sales" onAction="#showSalesView" maxWidth="Infinity"/>
+                <Button text="Items" onAction="#showItemsView" maxWidth="Infinity"/>
+                <Button text="Shifts" onAction="#showShiftsView" maxWidth="Infinity"/>
+                <Button text="Expenses" onAction="#showExpensesView" maxWidth="Infinity"/>
+                <Button text="Reports" onAction="#showReportsView" maxWidth="Infinity"/>
+                <Button text="Settings" onAction="#showSettingsView" maxWidth="Infinity"/>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <BorderPane fx:id="contentPane" />
+    </center>
+</BorderPane>

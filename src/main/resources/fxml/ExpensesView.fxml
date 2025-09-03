@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.ExpensesController"
+      xmlns="http://javafx.com/javafx/21" spacing="10" style="-fx-padding: 10;">
+    <children>
+        <Label text="Expenses Management" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+        <Label fx:id="shiftInfoLabel" text="No active shift. Please start a shift to manage expenses." style="-fx-text-fill: red;"/>
+        <TableView fx:id="expensesTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="idCol" prefWidth="50.0" text="ID"/>
+                <TableColumn fx:id="descriptionCol" prefWidth="350.0" text="Description"/>
+                <TableColumn fx:id="amountCol" prefWidth="150.0" text="Amount"/>
+                <TableColumn fx:id="dateCol" prefWidth="200.0" text="Date"/>
+            </columns>
+        </TableView>
+        <Button fx:id="addExpenseButton" text="Add New Expense" onAction="#handleAddExpense" disable="true"/>
+    </children>
+</VBox>

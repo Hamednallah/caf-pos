@@ -5,4 +5,9 @@ public class OrdersDAO {
   public int createOrderTransactional(Order order) throws SQLException {
     conn.setAutoCommit(false); try { int orderId; try (PreparedStatement ps = conn.prepareStatement("INSERT INTO \"order\"(cashier_id,shift_id,total_amount,discount_amount,status,payment_method,payment_confirmed) VALUES (?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)){ ps.setInt(1, order.cashierId==null?1:order.cashierId); if(order.shiftId==null) ps.setNull(2, Types.INTEGER); else ps.setInt(2, order.shiftId); ps.setBigDecimal(3, order.totalAmount); ps.setBigDecimal(4, order.discountAmount==null?java.math.BigDecimal.ZERO:order.discountAmount); ps.setString(5, order.status); ps.setString(6, order.paymentMethod); ps.setBoolean(7, order.paymentConfirmed); ps.executeUpdate(); try (ResultSet rs = ps.getGeneratedKeys()){ rs.next(); orderId = rs.getInt(1); } } if(order.items != null && !order.items.isEmpty()){ try (PreparedStatement ips = conn.prepareStatement("INSERT INTO order_item(order_id,item_id,quantity,line_total) VALUES (?,?,?,?)")){ for(OrderItem oi : order.items){ ips.setInt(1, orderId); ips.setInt(2, oi.getItemId()); ips.setInt(3, oi.getQuantity()); ips.setBigDecimal(4, oi.getLineTotal()); ips.addBatch(); } ips.executeBatch(); } } conn.commit(); conn.setAutoCommit(true); return orderId; } catch(SQLException ex){ conn.rollback(); conn.setAutoCommit(true); throw ex; } }
   public ResultSet findOrdersBetween(Timestamp from, Timestamp to) throws SQLException { PreparedStatement ps = conn.prepareStatement("SELECT * FROM \"order\" WHERE created_at BETWEEN ? AND ?"); ps.setTimestamp(1, from); ps.setTimestamp(2, to); return ps.executeQuery(); }
+  public ResultSet getOrdersByShift(int shiftId) throws SQLException {
+    PreparedStatement ps = conn.prepareStatement("SELECT * FROM \"order\" WHERE shift_id = ?");
+    ps.setInt(1, shiftId);
+    return ps.executeQuery();
+  }
 }

@@ -16,4 +16,11 @@ public class UsersService {
     public User findByUsername(String username) throws SQLException {
         return usersDAO.findByUsername(username);
     }
+
+    public int createUser(User user) throws SQLException {
+        if (user.getPasswordHash() == null) {
+            throw new IllegalArgumentException("Password hash must be set before creating user.");
+        }
+        return usersDAO.createUser(user.getUsername(), user.getPasswordHash(), user.getFullName(), user.getRoleId());
+    }
 }
