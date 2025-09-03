@@ -1,1 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?><VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.yourcompany.cafeteria.ui.ItemsController" spacing="8"><Label text="Items"/><TableView fx:id="itemsTable"/><Button text="Add Item" onAction="#handleAddItem"/></VBox>
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.ItemsController"
+      spacing="10" style="-fx-padding: 20;">
+    <children>
+        <Label text="Item Management" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+        <TableView fx:id="itemsTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="idCol" text="ID"/>
+                <TableColumn fx:id="nameCol" text="Name" prefWidth="200"/>
+                <TableColumn fx:id="priceCol" text="Price"/>
+                <TableColumn fx:id="categoryCol" text="Category ID"/>
+                <TableColumn fx:id="imagePathCol" text="Image Path" prefWidth="300"/>
+            </columns>
+        </TableView>
+        <HBox spacing="10">
+            <children>
+                <Button text="Add Item" onAction="#handleAddItem"/>
+                <Button fx:id="editButton" text="Edit Item" onAction="#handleEditItem"/>
+                <Button fx:id="deleteButton" text="Delete Item" onAction="#handleDeleteItem"/>
+            </children>
+        </HBox>
+    </children>
+</VBox>

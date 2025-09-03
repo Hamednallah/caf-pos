@@ -19,8 +19,8 @@
         </HBox>
         <HBox spacing="10" alignment="CENTER_LEFT">
             <children>
-                <Button text="Save Settings" onAction="#handleSaveSettings"/>
-                <Button text="Test Print" onAction="#handleTestPrint"/>
+                <Button fx:id="saveButton" text="Save Settings" onAction="#handleSaveSettings"/>
+                <Button fx:id="testPrintButton" text="Test Print" onAction="#handleTestPrint"/>
             </children>
         </HBox>
         <Label fx:id="statusLabel" text=""/>
