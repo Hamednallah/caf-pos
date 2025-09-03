@@ -1,0 +1,5 @@
+# Created at ٢٠٢٥-٠٩-٠٣T٢١:٣٨:٥٠.٩٩٦
+Boot Manifest-JAR contains absolute paths in classpath 'D:\projects\Caf-POS-single\caf-pos-2\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+
