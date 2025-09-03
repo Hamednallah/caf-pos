@@ -76,4 +76,60 @@ class ExpenseServiceTest {
         expense2.setDescription(" ");
         assertThrows(IllegalArgumentException.class, () -> expenseService.recordExpense(expense2));
     }
+
+    @Test
+    void testRecordExpenseWithParameters() throws Exception {
+        int shiftId = shiftService.startShift(1, new BigDecimal("100"));
+
+        int expenseId = expenseService.recordExpense(
+            new BigDecimal("25.75"), 
+            "Coffee beans", 
+            "Inventory", 
+            1, 
+            shiftId
+        );
+        
+        assertTrue(expenseId > 0);
+
+        try (ResultSet rs = expenseService.getExpensesByShift(shiftId)) {
+            assertTrue(rs.next());
+            assertEquals(expenseId, rs.getInt("id"));
+            assertEquals(0, new BigDecimal("25.75").compareTo(rs.getBigDecimal("amount")));
+            assertEquals("Coffee beans", rs.getString("description"));
+            assertEquals("Inventory", rs.getString("category"));
+            assertEquals(1, rs.getInt("recorded_by"));
+            assertEquals(shiftId, rs.getInt("shift_id"));
+            assertFalse(rs.next());
+        }
+    }
+
+    @Test
+    void testRecordExpenseWithParametersInvalidInput() {
+        int shiftId = 1;
+        
+        // Test null amount
+        assertThrows(IllegalArgumentException.class, () -> 
+            expenseService.recordExpense(null, "Test", "Category", 1, shiftId)
+        );
+        
+        // Test zero amount
+        assertThrows(IllegalArgumentException.class, () -> 
+            expenseService.recordExpense(BigDecimal.ZERO, "Test", "Category", 1, shiftId)
+        );
+        
+        // Test negative amount
+        assertThrows(IllegalArgumentException.class, () -> 
+            expenseService.recordExpense(new BigDecimal("-10"), "Test", "Category", 1, shiftId)
+        );
+        
+        // Test empty description
+        assertThrows(IllegalArgumentException.class, () -> 
+            expenseService.recordExpense(new BigDecimal("10"), "", "Category", 1, shiftId)
+        );
+        
+        // Test null description
+        assertThrows(IllegalArgumentException.class, () -> 
+            expenseService.recordExpense(new BigDecimal("10"), null, "Category", 1, shiftId)
+        );
+    }
 }

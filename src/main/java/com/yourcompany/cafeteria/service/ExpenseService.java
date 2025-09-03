@@ -27,4 +27,22 @@ public class ExpenseService {
     public ResultSet getExpensesByShift(int shiftId) throws Exception {
         return dao.listByShift(shiftId);
     }
+
+    public int recordExpense(BigDecimal amount, String description, String category, Integer recordedBy, Integer shiftId) throws Exception {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Expense amount must be positive.");
+        }
+        if (description == null || description.trim().isEmpty()) {
+            throw new IllegalArgumentException("Expense description cannot be empty.");
+        }
+        
+        Expense expense = new Expense();
+        expense.setAmount(amount);
+        expense.setDescription(description);
+        expense.setCategory(category);
+        expense.setRecordedBy(recordedBy);
+        expense.setShiftId(shiftId);
+        
+        return dao.insert(expense);
+    }
 }
