@@ -1,0 +1,15 @@
+-------------------------------------------------------------------------------
+Test set: com.yourcompany.cafeteria.ui.SettingsViewTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 20.33 s <<< FAILURE! -- in com.yourcompany.cafeteria.ui.SettingsViewTest
+com.yourcompany.cafeteria.ui.SettingsViewTest.settings_should_list_printers_and_save(FxRobot) -- Time elapsed: 20.02 s <<< ERROR!
+org.testfx.service.query.EmptyNodeQueryException: 
+there is no node in the scene-graph matching the query: NodeQuery: from nodes: [BorderPane@75c59997[styleClass=root]],
+lookup by function: "org.testfx.util.NodeQueryUtils$$Lambda/0x00000052014e4218@a1cdc6d",
+lookup by selector: "#printerCombo"
+	at org.testfx.service.query.impl.NodeQueryImpl.queryAs(NodeQueryImpl.java:142)
+	at com.yourcompany.cafeteria.ui.SettingsViewTest.settings_should_list_printers_and_save(SettingsViewTest.java:32)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

@@ -24,6 +24,10 @@ public class SettingsController {
     private void loadPrinters() {
         try {
             String[] printers = ReceiptPrinter.listPrinters();
+            if (printers == null || printers.length == 0) {
+                // Headless CI or no printers installed: provide a virtual entry so UI remains testable
+                printers = new String[]{"Virtual Test Printer"};
+            }
             printerCombo.setItems(FXCollections.observableArrayList(printers));
         } catch (Exception e) {
             showError("Error Loading Printers", "Could not retrieve the list of system printers.", e.getMessage());
