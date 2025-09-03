@@ -1,0 +1,27 @@
+RULES FOR ALL AGENTS (must be included in every prompt)
+
+Do not recreate or change DAO public signatures in src/main/java/.../dao/.
+
+Tests-first: If unsure what to change, create a failing test that reproduces the issue and show failing test output before fixing it.
+
+Keep commits small and atomic. Include unit tests for every logic change.
+
+Use branch names feature/<short> and open PRs to main.
+
+Provide a short PR description, list of tests added, and a one-line risk summary.
+---
+description:
+RULES FOR ALL AGENTS (must be included in every prompt)
+
+Do not recreate or change DAO public signatures in src/main/java/.../dao/.
+
+Tests-first: If unsure what to change, create a failing test that reproduces the issue and show failing test output before fixing it.
+
+Keep commits small and atomic. Include unit tests for every logic change.
+
+Use branch names feature/<short> and open PRs to main.
+
+Provide a short PR description, list of tests added, and a one-line risk summary.
+globs:
+alwaysApply: true
+---
