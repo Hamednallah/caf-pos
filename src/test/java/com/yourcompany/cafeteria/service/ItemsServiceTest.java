@@ -1,8 +1,7 @@
 package com.yourcompany.cafeteria.service;
 
 import com.yourcompany.cafeteria.model.Item;
-import com.yourcompany.cafeteria.util.DataSourceProvider;
-import org.flywaydb.core.Flyway;
+import com.yourcompany.cafeteria.util.TestDatabase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,22 +19,14 @@ class ItemsServiceTest {
     private ItemsService itemsService;
 
     @BeforeEach
-    void setUp() throws SQLException {
-        DataSourceProvider.setURL("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1");
-        connection = DataSourceProvider.getConnection();
-
-        // Clean the database before each test
-        try (java.sql.Statement s = connection.createStatement()) {
-            s.execute("DROP ALL OBJECTS");
-        }
-
-        Flyway flyway = Flyway.configure().dataSource(DataSourceProvider.getDataSource()).load();
-        flyway.migrate();
+    void setUp() throws Exception {
+        // Use the standard test database utility to ensure a clean, migrated state
+        connection = TestDatabase.open();
         itemsService = new ItemsService(connection);
     }
 
     @AfterEach
-    void tearDown() throws SQLException {
+    void tearDown() throws Exception {
         if (connection != null) {
             connection.close();
         }
@@ -103,7 +94,8 @@ class ItemsServiceTest {
         item2.setPrice(new BigDecimal("2.00"));
         itemsService.add(item2);
 
-        // 3 from seed + 2 from this test
+        // The database is cleaned and seeded before each test.
+        // Seed data has 3 items. This test adds 2 more.
         List<Item> items = itemsService.listAll();
         assertEquals(5, items.size());
     }

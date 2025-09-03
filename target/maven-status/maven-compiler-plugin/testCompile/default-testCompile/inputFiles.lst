@@ -1,3 +1,4 @@
+/app/src/test/java/com/yourcompany/cafeteria/OrderFlowIntegrationTest.java
 /app/src/test/java/com/yourcompany/cafeteria/dao/ExpensesDAOTest.java
 /app/src/test/java/com/yourcompany/cafeteria/dao/ItemsDAOTest.java
 /app/src/test/java/com/yourcompany/cafeteria/dao/OrdersDAOTest.java
