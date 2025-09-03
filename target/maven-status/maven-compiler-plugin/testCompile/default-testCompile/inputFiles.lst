@@ -11,4 +11,5 @@
 /app/src/test/java/com/yourcompany/cafeteria/service/ReportsServiceTest.java
 /app/src/test/java/com/yourcompany/cafeteria/service/ShiftServiceTest.java
 /app/src/test/java/com/yourcompany/cafeteria/service/UsersServiceTest.java
+/app/src/test/java/com/yourcompany/cafeteria/util/EscPosBuilderTest.java
 /app/src/test/java/com/yourcompany/cafeteria/util/TestDatabase.java

@@ -9,6 +9,7 @@ com/yourcompany/cafeteria/ui/ItemsController.class
 com/yourcompany/cafeteria/model/Order.class
 com/yourcompany/cafeteria/service/ShiftService.class
 com/yourcompany/cafeteria/service/SettingsService.class
+com/yourcompany/cafeteria/model/ShiftSummary.class
 com/yourcompany/cafeteria/util/ReceiptPrinter.class
 com/yourcompany/cafeteria/MainApp.class
 com/yourcompany/cafeteria/service/ReportsService.class
@@ -34,3 +35,4 @@ com/yourcompany/cafeteria/dao/OrderItemsDAO.class
 com/yourcompany/cafeteria/util/SessionManager.class
 com/yourcompany/cafeteria/model/OrderItem.class
 com/yourcompany/cafeteria/dao/ExpensesDAO.class
+com/yourcompany/cafeteria/util/EscPosBuilder.class

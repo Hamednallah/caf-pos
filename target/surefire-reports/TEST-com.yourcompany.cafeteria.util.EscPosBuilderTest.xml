@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.yourcompany.cafeteria.dao.ExpensesDAOTest" time="0.082" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.019" tests="10" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -55,21 +55,14 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="insertExpense" classname="com.yourcompany.cafeteria.dao.ExpensesDAOTest" time="0.081">
-    <system-err><![CDATA[[main] INFO org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:testdb (H2 2.2)
-[main] INFO org.flywaydb.core.internal.command.clean.CleanExecutor - Successfully dropped pre-schema database level objects (execution time 00:00.000s)
-[main] INFO org.flywaydb.core.internal.command.clean.CleanExecutor - Successfully cleaned schema "PUBLIC" (execution time 00:00.009s)
-[main] INFO org.flywaydb.core.internal.command.clean.CleanExecutor - Successfully cleaned schema "PUBLIC" (execution time 00:00.000s)
-[main] INFO org.flywaydb.core.internal.command.clean.CleanExecutor - Successfully dropped post-schema database level objects (execution time 00:00.000s)
-[main] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory - Schema history table "PUBLIC"."flyway_schema_history" does not exist yet
-[main] INFO org.flywaydb.core.internal.command.DbValidate - Successfully validated 4 migrations (execution time 00:00.001s)
-[main] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory - Creating Schema History table "PUBLIC"."flyway_schema_history" ...
-[main] INFO org.flywaydb.core.internal.command.DbMigrate - Current version of schema "PUBLIC": << Empty Schema >>
-[main] INFO org.flywaydb.core.internal.command.DbMigrate - Migrating schema "PUBLIC" to version "1 - Initial"
-[main] INFO org.flywaydb.core.internal.command.DbMigrate - Migrating schema "PUBLIC" to version "2 - Seed"
-[main] INFO org.flywaydb.core.internal.command.DbMigrate - Migrating schema "PUBLIC" to version "3 - Reports Indexes"
-[main] INFO org.flywaydb.core.internal.command.DbMigrate - Migrating schema "PUBLIC" to version "4 - Defaults"
-[main] INFO org.flywaydb.core.internal.command.DbMigrate - Successfully applied 4 migrations to schema "PUBLIC", now at version v4 (execution time 00:00.017s)
-]]></system-err>
-  </testcase>
+  <testcase name="testAlignLeft" classname="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.005"/>
+  <testcase name="testComplexSequence" classname="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.001"/>
+  <testcase name="testAlignRight" classname="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.0"/>
+  <testcase name="testDefaultConstructorInitializes" classname="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.001"/>
+  <testcase name="testCut" classname="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.001"/>
+  <testcase name="testBold" classname="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.0"/>
+  <testcase name="testUnderline" classname="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.001"/>
+  <testcase name="testInitialize" classname="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.0"/>
+  <testcase name="testAlignCenter" classname="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.002"/>
+  <testcase name="testAppend" classname="com.yourcompany.cafeteria.util.EscPosBuilderTest" time="0.001"/>
 </testsuite>

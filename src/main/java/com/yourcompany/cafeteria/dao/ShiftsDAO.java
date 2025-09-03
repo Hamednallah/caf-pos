@@ -7,4 +7,9 @@ public class ShiftsDAO {
   }
   public void endShift(int id) throws SQLException { try (PreparedStatement ps = conn.prepareStatement("UPDATE shift SET ended_at=CURRENT_TIMESTAMP WHERE id=?")){ ps.setInt(1, id); ps.executeUpdate(); } }
   public ResultSet getActiveShiftForCashier(int cashierId) throws SQLException { PreparedStatement ps = conn.prepareStatement("SELECT id,started_at,ended_at,starting_float FROM shift WHERE cashier_id=? AND ended_at IS NULL"); ps.setInt(1, cashierId); return ps.executeQuery(); }
+  public ResultSet getShiftById(int shiftId) throws SQLException {
+    PreparedStatement ps = conn.prepareStatement("SELECT * FROM shift WHERE id = ?");
+    ps.setInt(1, shiftId);
+    return ps.executeQuery();
+  }
 }

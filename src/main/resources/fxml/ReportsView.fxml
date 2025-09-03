@@ -18,6 +18,7 @@
                 <Label text="Select Date:"/>
                 <DatePicker fx:id="datePicker"/>
                 <Button text="Generate Report" onAction="#handleGenerateReport"/>
+                <Button fx:id="exportButton" text="Export to CSV" onAction="#handleExportCsv" disable="true"/>
             </children>
         </HBox>
         <TableView fx:id="reportTable" VBox.vgrow="ALWAYS">

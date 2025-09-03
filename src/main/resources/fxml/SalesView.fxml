@@ -51,7 +51,7 @@
                                 <Label fx:id="totalLabel" style="-fx-font-weight: bold;" text="0.00"/>
                             </children>
                         </HBox>
-                        <Button onAction="#handleFinalize" text="Finalize Sale" maxWidth="Infinity"/>
+                        <Button fx:id="finalizeButton" onAction="#handleFinalize" text="Finalize Sale" maxWidth="Infinity"/>
                     </children>
                 </VBox>
             </items>

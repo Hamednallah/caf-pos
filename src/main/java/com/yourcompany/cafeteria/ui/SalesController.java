@@ -7,6 +7,7 @@ import com.yourcompany.cafeteria.service.ItemsService;
 import com.yourcompany.cafeteria.service.OrdersService;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
 import com.yourcompany.cafeteria.util.ReceiptPrinter;
+import com.yourcompany.cafeteria.util.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -31,6 +32,7 @@ public class SalesController {
     @FXML private TableColumn<OrderItem, BigDecimal> cartPriceCol;
     @FXML private TextField discountField;
     @FXML private Label totalLabel;
+    @FXML private Button finalizeButton;
 
     private ObservableList<Item> itemCatalogMasterList = FXCollections.observableArrayList();
     private FilteredList<Item> filteredItemCatalog;
@@ -42,6 +44,9 @@ public class SalesController {
         setupCartTable();
         setupSearchFilter();
         setupEventListeners();
+
+        // Disable finalize button if no shift is active
+        finalizeButton.setDisable(!SessionManager.isShiftActive());
 
         loadCatalog();
     }
@@ -84,6 +89,10 @@ public class SalesController {
 
     private void setupEventListeners() {
         itemCatalogView.setOnMouseClicked(event -> {
+            if (!SessionManager.isShiftActive()) {
+                showAlert(Alert.AlertType.WARNING, "No Active Shift", "You must start a shift before making a sale.");
+                return;
+            }
             Item selectedItem = itemCatalogView.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
                 addToCart(selectedItem);
@@ -157,11 +166,11 @@ public class SalesController {
         }
 
         Order order = new Order();
-        order.cashierId = 1; // Hardcoded: Get from session
-        order.shiftId = 1; // Hardcoded: Get from active shift
+        order.cashierId = SessionManager.getCurrentCashierId();
+        order.shiftId = SessionManager.getCurrentShiftId();
         order.status = "FINALIZED";
         order.paymentMethod = result.get();
-        order.paymentConfirmed = true; // For BANK, might need manual confirmation
+        order.paymentConfirmed = true;
         order.items = new ArrayList<>(cart);
         order.createdAt = LocalDateTime.now();
 
@@ -177,7 +186,7 @@ public class SalesController {
 
         try (var c = DataSourceProvider.getConnection()) {
             OrdersService ordersService = new OrdersService(c);
-            int id = ordersService.create(order); // Corrected method call
+            int id = ordersService.create(order);
             order.id = id;
 
             showAlert(Alert.AlertType.INFORMATION, "Success", "Order #" + id + " created successfully.");

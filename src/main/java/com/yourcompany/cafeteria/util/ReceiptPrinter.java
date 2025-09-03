@@ -13,13 +13,13 @@ import java.time.format.DateTimeFormatter;
 public class ReceiptPrinter {
 
     /**
-     * Formats and prints an order receipt to the default printer.
+     * Formats and prints an order receipt to the default printer using ESC/POS commands.
      * @param order The order to print.
      */
     public static void print(Order order) {
         try {
-            String receiptText = formatReceipt(order);
-            print(receiptText);
+            byte[] receiptBytes = formatEscPosReceipt(order);
+            print(receiptBytes);
         } catch (Exception e) {
             e.printStackTrace();
             // In a real UI, show an alert to the user that printing failed.
@@ -27,10 +27,18 @@ public class ReceiptPrinter {
     }
 
     /**
-     * Prints a raw string to the default printer. Falls back to console if no printer is configured.
+     * Prints a raw string to the default printer.
      * @param text The text to print.
      */
     public static void print(String text) throws Exception {
+        print(text.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Prints a byte array to the default printer. Falls back to console if no printer is configured.
+     * @param data The byte array to print.
+     */
+    public static void print(byte[] data) throws Exception {
         String printerName;
         try (Connection c = DataSourceProvider.getConnection()) {
             printerName = new SettingsService(c).get("printer.default");
@@ -38,9 +46,9 @@ public class ReceiptPrinter {
 
         if (printerName == null || printerName.trim().isEmpty()) {
             System.err.println("Receipt printing skipped: Default printer not configured in Settings.");
-            System.out.println("\n--- CONSOLE FALLBACK RECEIPT ---");
-            System.out.println(text);
-            System.out.println("--------------------------------\n");
+            System.out.println("\n--- CONSOLE FALLBACK (RAW BYTES) ---");
+            System.out.println(new String(data, StandardCharsets.UTF_8)); // For demonstration
+            System.out.println("------------------------------------\n");
             return;
         }
 
@@ -57,13 +65,9 @@ public class ReceiptPrinter {
         }
 
         DocPrintJob job = svc.createPrintJob();
-        job.print(new SimpleDoc(text.getBytes(StandardCharsets.UTF_8), DocFlavor.BYTE_ARRAY.AUTOSENSE, null), null);
+        job.print(new SimpleDoc(data, DocFlavor.BYTE_ARRAY.AUTOSENSE, null), null);
     }
 
-    /**
-     * Lists all available printer names.
-     * @return An array of printer names.
-     */
     public static String[] listPrinters() {
         PrintService[] arr = PrintServiceLookup.lookupPrintServices(null, null);
         String[] names = new String[arr.length];
@@ -73,39 +77,62 @@ public class ReceiptPrinter {
         return names;
     }
 
-    private static String formatReceipt(Order order) {
-        StringBuilder sb = new StringBuilder();
+    private static byte[] formatEscPosReceipt(Order order) {
+        EscPosBuilder builder = new EscPosBuilder();
 
-        sb.append("Order ID: ").append(order.id).append("\n");
-        sb.append("Cashier ID: ").append(order.cashierId).append("\n");
+        builder.alignCenter()
+               .bold(true)
+               .append("Cafeteria POS")
+               .feedLine()
+               .bold(false)
+               .append("------------------------------------------")
+               .feedLine()
+               .alignLeft()
+               .append("Order ID: " + order.id)
+               .feedLine()
+               .append("Cashier: " + order.cashierId)
+               .feedLine();
+
         if (order.createdAt != null) {
-            sb.append("Date: ").append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(order.createdAt)).append("\n");
+            builder.append("Date: " + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(order.createdAt)).feedLine();
         }
-        sb.append("----------------------------------------\n");
+        builder.append("------------------------------------------").feedLine();
 
         for (OrderItem item : order.items) {
             String itemName = item.getItemName() != null ? item.getItemName() : "Item #" + item.getItemId();
-            sb.append(String.format("%-20s %2d x %5.2f = %6.2f\n",
-                    itemName,
+            String itemLine = String.format("%-24s %2d x %5.2f = %6.2f",
+                    itemName.length() > 24 ? itemName.substring(0, 24) : itemName,
                     item.getQuantity(),
                     item.getPriceAtPurchase(),
-                    item.getLineTotal()));
+                    item.getLineTotal());
+            builder.append(itemLine).feedLine();
         }
 
-        sb.append("----------------------------------------\n");
+        builder.append("------------------------------------------").feedLine();
 
         BigDecimal subtotal = order.totalAmount != null ? order.totalAmount : BigDecimal.ZERO;
         BigDecimal discount = order.discountAmount != null ? order.discountAmount : BigDecimal.ZERO;
         BigDecimal total = subtotal.subtract(discount);
 
-        sb.append(String.format("%28s: %6.2f\n", "Subtotal", subtotal));
+        builder.alignRight()
+               .append(String.format("Subtotal: %8.2f", subtotal))
+               .feedLine();
+
         if (discount.compareTo(BigDecimal.ZERO) > 0) {
-            sb.append(String.format("%28s: %6.2f\n", "Discount", discount.negate()));
+            builder.append(String.format("Discount: %8.2f", discount.negate())).feedLine();
         }
-        sb.append(String.format("%28s: %6.2f\n", "Total", total));
 
-        sb.append("\n       Thank you for your visit!        \n");
+        builder.bold(true)
+               .append(String.format("Total: %8.2f", total))
+               .feedLine()
+               .bold(false);
 
-        return sb.toString();
+        builder.feedLine()
+               .alignCenter()
+               .append("Thank you for your visit!")
+               .feedLines(3)
+               .cut();
+
+        return builder.getBytes();
     }
 }

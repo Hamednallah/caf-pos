@@ -2,6 +2,7 @@ package com.yourcompany.cafeteria.ui;
 
 import com.yourcompany.cafeteria.service.SettingsService;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
+import com.yourcompany.cafeteria.util.EscPosBuilder;
 import com.yourcompany.cafeteria.util.ReceiptPrinter;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -62,11 +63,35 @@ public class SettingsController {
     @FXML
     public void handleTestPrint() {
         try {
-            String testMessage = "================================\n" +
-                                 "       CAFETERIA POS\n" +
-                                 "    This is a test print.\n" +
-                                 "================================\n\n\n";
-            ReceiptPrinter.print(testMessage);
+            EscPosBuilder builder = new EscPosBuilder();
+            byte[] testReceipt = builder
+                .alignCenter()
+                .bold(true)
+                .append("CAFETERIA POS")
+                .feedLine()
+                .bold(false)
+                .append("This is a test print.")
+                .feedLine()
+                .append("------------------------------------------")
+                .feedLine()
+                .alignLeft()
+                .append("Left aligned text.")
+                .feedLine()
+                .alignCenter()
+                .append("Center aligned text.")
+                .feedLine()
+                .alignRight()
+                .append("Right aligned text.")
+                .feedLine()
+                .underline(true)
+                .append("Underlined text.")
+                .underline(false)
+                .feedLine()
+                .feedLines(3)
+                .cut()
+                .getBytes();
+
+            ReceiptPrinter.print(testReceipt);
             showAlert(Alert.AlertType.INFORMATION, "Test Print Sent", "A test print job has been sent to the default printer.");
             statusLabel.setText("Test print sent successfully.");
         } catch (Exception e) {

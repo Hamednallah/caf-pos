@@ -2,6 +2,7 @@ com/yourcompany/cafeteria/dao/OrdersDAOTest.class
 com/yourcompany/cafeteria/util/TestDatabase.class
 com/yourcompany/cafeteria/dao/ReportsDAOTest.class
 com/yourcompany/cafeteria/service/ItemsServiceTest.class
+com/yourcompany/cafeteria/util/EscPosBuilderTest.class
 com/yourcompany/cafeteria/dao/UsersDAOTest.class
 com/yourcompany/cafeteria/service/OrdersServiceTest.class
 com/yourcompany/cafeteria/dao/ExpensesDAOTest.class
