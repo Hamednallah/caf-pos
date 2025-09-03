@@ -7,10 +7,13 @@
 /app/src/main/java/com/yourcompany/cafeteria/dao/SettingsDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/ShiftsDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/UsersDAO.java
+/app/src/main/java/com/yourcompany/cafeteria/model/DateRangeReport.java
 /app/src/main/java/com/yourcompany/cafeteria/model/Expense.java
 /app/src/main/java/com/yourcompany/cafeteria/model/Item.java
 /app/src/main/java/com/yourcompany/cafeteria/model/Order.java
 /app/src/main/java/com/yourcompany/cafeteria/model/OrderItem.java
+/app/src/main/java/com/yourcompany/cafeteria/model/Shift.java
+/app/src/main/java/com/yourcompany/cafeteria/model/ShiftReport.java
 /app/src/main/java/com/yourcompany/cafeteria/model/ShiftSummary.java
 /app/src/main/java/com/yourcompany/cafeteria/model/User.java
 /app/src/main/java/com/yourcompany/cafeteria/service/ExpenseService.java
@@ -20,7 +23,6 @@
 /app/src/main/java/com/yourcompany/cafeteria/service/ReportsService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/SettingsService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/ShiftService.java
-/app/src/main/java/com/yourcompany/cafeteria/service/StartupService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/UsersService.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ExpensesController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ItemsController.java

@@ -12,4 +12,8 @@ public class ShiftsDAO {
     ps.setInt(1, shiftId);
     return ps.executeQuery();
   }
+  public ResultSet listAllShifts() throws SQLException {
+    PreparedStatement ps = conn.prepareStatement("SELECT * FROM shift ORDER BY started_at DESC");
+    return ps.executeQuery();
+  }
 }
