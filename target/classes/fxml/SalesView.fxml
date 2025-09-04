@@ -11,7 +11,7 @@
             <children>
                 <Label text="Categories" styleClass="h2" />
                 <ListView fx:id="categoryListView" prefHeight="200.0" />
-                <TextField fx:id="searchField" promptText="Search items..." />
+                <TextField fx:id="searchField" promptText="Search items..." accessibleText="Search for items by name" />
             </children>
         </VBox>
     </left>
