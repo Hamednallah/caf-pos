@@ -19,13 +19,8 @@ public class UsersService {
         return usersDAO.findByUsername(username);
     }
 
-    public int createUser(User user, String plainTextPassword) throws SQLException {
-        if (plainTextPassword == null || plainTextPassword.trim().isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be empty.");
-        }
-        String hashedPassword = BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
-        user.setPasswordHash(hashedPassword);
-        return usersDAO.createUser(user.getUsername(), user.getPasswordHash(), user.getFullName(), user.getRoleId());
+    public int createUser(String username, String passwordHash, String fullName, int roleId) throws SQLException {
+        return usersDAO.createUser(username, passwordHash, fullName, roleId);
     }
 
     public User authenticate(String username, String plainTextPassword) throws SQLException {
@@ -36,24 +31,15 @@ public class UsersService {
         return null;
     }
 
-    public List<User> listAll() throws SQLException {
+    public List<User> listAllUsers() throws SQLException {
         return usersDAO.listAll();
     }
 
-    public void updateUser(User user, String plainTextPassword) throws SQLException {
-        if (plainTextPassword != null && !plainTextPassword.trim().isEmpty()) {
-            String hashedPassword = BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
-            user.setPasswordHash(hashedPassword);
-        } else {
-            user.setPasswordHash(null);
-        }
+    public void updateUser(User user) throws SQLException {
         usersDAO.updateUser(user);
     }
 
-    public void toggleUserStatus(int userId) throws SQLException {
-        User user = usersDAO.findById(userId);
-        if (user != null) {
-            usersDAO.updateUserStatus(userId, !user.isActive());
-        }
+    public void updateUserStatus(int userId, boolean isActive) throws SQLException {
+        usersDAO.updateUserStatus(userId, isActive);
     }
 }

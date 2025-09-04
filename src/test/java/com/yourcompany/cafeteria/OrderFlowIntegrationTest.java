@@ -49,7 +49,7 @@ public class OrderFlowIntegrationTest {
         cashier.setFullName("Test Cashier");
         cashier.setPasswordHash(BCrypt.hashpw("password", BCrypt.gensalt()));
         cashier.setRoleId(2); // Assuming 2 is the roleId for CASHIER
-        int cashierId = usersService.createUser(cashier);
+        int cashierId = usersService.createUser(cashier.getUsername(), cashier.getPasswordHash(), cashier.getFullName(), cashier.getRoleId());
         cashier.setId(cashierId);
 
         Item testCoffee = new Item();

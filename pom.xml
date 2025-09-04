@@ -27,6 +27,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
+          <reuseForks>false</reuseForks>
           <argLine>-Djava.awt.headless=false -Dprism.order=sw -Dsun.java2d.d3d=false -Dcaf.test.virtualPrinters="Virtual Test Printer"</argLine>
           <properties>
             <configurationParameters>junit.jupiter.extensions.autodetection.enabled=true</configurationParameters>
