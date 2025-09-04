@@ -39,6 +39,8 @@ public class SalesController {
     @FXML private RadioButton cashRadioButton;
     @FXML private RadioButton bankRadioButton;
     @FXML private Button finalizeButton;
+    @FXML private Button removeButton;
+    @FXML private Button changeQuantityButton;
 
     private ItemsService itemsService;
     private OrdersService ordersService;
@@ -147,6 +149,43 @@ public class SalesController {
             newOrderItem.setQuantity(1);
             newOrderItem.setPriceAtPurchase(item.getPrice());
             cart.add(newOrderItem);
+        }
+    }
+
+    @FXML
+    private void handleRemoveItem() {
+        OrderItem selectedItem = cartTable.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            cart.remove(selectedItem);
+        } else {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select an item from the cart to remove.");
+        }
+    }
+
+    @FXML
+    private void handleChangeQuantity() {
+        OrderItem selectedItem = cartTable.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            TextInputDialog dialog = new TextInputDialog(String.valueOf(selectedItem.getQuantity()));
+            dialog.setTitle("Change Quantity");
+            dialog.setHeaderText("Enter the new quantity for " + selectedItem.getItemName());
+            dialog.setContentText("Quantity:");
+
+            dialog.showAndWait().ifPresent(quantityStr -> {
+                try {
+                    int newQuantity = Integer.parseInt(quantityStr);
+                    if (newQuantity > 0) {
+                        selectedItem.setQuantity(newQuantity);
+                        cartTable.refresh();
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Invalid Quantity", "Quantity must be greater than zero.");
+                    }
+                } catch (NumberFormatException e) {
+                    showAlert(Alert.AlertType.ERROR, "Invalid Input", "Please enter a valid number.");
+                }
+            });
+        } else {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select an item from the cart to change its quantity.");
         }
     }
 
