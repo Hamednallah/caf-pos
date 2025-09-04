@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.yourcompany.cafeteria.service.ItemsServiceTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.685 s -- in com.yourcompany.cafeteria.service.ItemsServiceTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.059 s -- in com.yourcompany.cafeteria.service.ItemsServiceTest

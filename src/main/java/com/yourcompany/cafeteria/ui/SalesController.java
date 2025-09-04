@@ -11,10 +11,12 @@ import com.yourcompany.cafeteria.util.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.print.PrinterJob;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
@@ -244,6 +246,7 @@ public class SalesController {
         try {
             int id = ordersService.create(order);
             showAlert(Alert.AlertType.INFORMATION, "Success", "Order #" + id + " created successfully.");
+            printReceipt(order);
             clearSale();
         } catch (Exception e) {
             showError("Failed to Save Order", "There was an error saving the order to the database.", e.getMessage());
@@ -271,5 +274,25 @@ public class SalesController {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    private void printReceipt(Order order) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ReceiptView.fxml"));
+            VBox receiptLayout = loader.load();
+            ReceiptController controller = loader.getController();
+            controller.populateReceipt(order);
+
+            PrinterJob job = PrinterJob.createPrinterJob();
+            if (job != null && job.showPrintDialog(finalizeButton.getScene().getWindow())) {
+                boolean success = job.printPage(receiptLayout);
+                if (success) {
+                    job.endJob();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Printing Error", "Could not print the receipt.", e.getMessage());
+        }
     }
 }
