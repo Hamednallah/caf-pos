@@ -1,12 +1,19 @@
 package com.yourcompany.cafeteria.service;
-import com.yourcompany.cafeteria.dao.ItemsDAO; import com.yourcompany.cafeteria.model.Item; import java.sql.Connection; import java.util.List;
+import com.yourcompany.cafeteria.dao.CategoryDAO;
+import com.yourcompany.cafeteria.dao.ItemsDAO;
+import com.yourcompany.cafeteria.model.Category;
+import com.yourcompany.cafeteria.model.Item;
+import java.sql.Connection;
+import java.util.List;
 import java.math.BigDecimal;
 
 public class ItemsService {
-    private final ItemsDAO dao;
+    private final ItemsDAO itemsDAO;
+    private final CategoryDAO categoryDAO;
 
     public ItemsService(Connection c) {
-        this.dao = new ItemsDAO(c);
+        this.itemsDAO = new ItemsDAO(c);
+        this.categoryDAO = new CategoryDAO(c);
     }
 
     private void validateItem(Item i) {
@@ -20,23 +27,27 @@ public class ItemsService {
 
     public int add(Item i) throws Exception {
         validateItem(i);
-        return dao.insert(i);
+        return itemsDAO.insert(i);
     }
 
     public List<Item> listAll() throws Exception {
-        return dao.listAll();
+        return itemsDAO.listAll();
+    }
+
+    public List<Category> getAllCategories() throws Exception {
+        return categoryDAO.listAll();
     }
 
     public Item findById(int id) throws Exception {
-        return dao.findById(id);
+        return itemsDAO.findById(id);
     }
 
     public void update(Item it) throws Exception {
         validateItem(it);
-        dao.update(it);
+        itemsDAO.update(it);
     }
 
     public void delete(int id) throws Exception {
-        dao.delete(id);
+        itemsDAO.delete(id);
     }
 }

@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
@@ -19,6 +20,10 @@ public class MainController {
     private BorderPane contentPane;
     @FXML
     private Button usersButton;
+    @FXML
+    private Label shiftStatusLabel;
+    @FXML
+    private Label currentUserLabel;
 
     @FXML
     public void initialize() {
@@ -32,12 +37,26 @@ public class MainController {
         }
 
         // Apply role-based access control
-        if (SessionManager.getCurrentUser() != null && SessionManager.getCurrentUser().getRoleId() == 1) {
-            usersButton.setVisible(true);
-            usersButton.setManaged(true);
+        if (SessionManager.getCurrentUser() != null) {
+            currentUserLabel.setText("User: " + SessionManager.getCurrentUser().getFullName());
+            if (SessionManager.getCurrentUser().getRoleId() == 1) { // ADMIN
+                usersButton.setVisible(true);
+                usersButton.setManaged(true);
+            } else {
+                usersButton.setVisible(false);
+                usersButton.setManaged(false);
+            }
         } else {
+            currentUserLabel.setText("Not Logged In");
             usersButton.setVisible(false);
             usersButton.setManaged(false);
+        }
+
+        // Update shift status
+        if (SessionManager.isShiftActive()) {
+            shiftStatusLabel.setText("Shift #" + SessionManager.getCurrentShiftId() + " is Active");
+        } else {
+            shiftStatusLabel.setText("No Active Shift");
         }
 
         // Load the default view on startup

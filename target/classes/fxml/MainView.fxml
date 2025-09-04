@@ -2,25 +2,40 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.MainController"
-            xmlns="http://javafx.com/javafx/21" prefHeight="768.0" prefWidth="1366.0">
+<BorderPane prefHeight="768.0" prefWidth="1366.0" styleClass="root" stylesheets="@../application.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.MainController">
     <left>
-        <VBox spacing="10" style="-fx-padding: 10; -fx-background-color: #e0e0e0;" alignment="TOP_CENTER">
+        <VBox prefWidth="200.0" spacing="10" style="-fx-background-color: -fx-surface; -fx-padding: 10;">
             <children>
-                <Button text="Sales" onAction="#showSalesView" maxWidth="Infinity"/>
-                <Button text="Items" onAction="#showItemsView" maxWidth="Infinity"/>
-                <Button text="Shifts" onAction="#showShiftsView" maxWidth="Infinity"/>
-                <Button text="Expenses" onAction="#showExpensesView" maxWidth="Infinity"/>
-                <Button text="Reports" onAction="#showReportsView" maxWidth="Infinity"/>
-                <Button fx:id="usersButton" text="Users" onAction="#showUsersView" maxWidth="Infinity"/>
-                <Button text="Settings" onAction="#showSettingsView" maxWidth="Infinity"/>
+                <Label styleClass="h1" text="Cafeteria POS">
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin>
+                </Label>
+                <Button onAction="#showSalesView" styleClass="sidebar-button" text="Sales" maxWidth="Infinity"/>
+                <Button onAction="#showItemsView" styleClass="sidebar-button" text="Items" maxWidth="Infinity"/>
+                <Button onAction="#showShiftsView" styleClass="sidebar-button" text="Shifts" maxWidth="Infinity"/>
+                <Button onAction="#showExpensesView" styleClass="sidebar-button" text="Expenses" maxWidth="Infinity"/>
+                <Button onAction="#showReportsView" styleClass="sidebar-button" text="Reports" maxWidth="Infinity"/>
+                <Button fx:id="usersButton" onAction="#showUsersView" styleClass="sidebar-button" text="Users" maxWidth="Infinity"/>
+                <Button onAction="#showSettingsView" styleClass="sidebar-button" text="Settings" maxWidth="Infinity"/>
             </children>
         </VBox>
     </left>
     <center>
         <BorderPane fx:id="contentPane" />
     </center>
+   <top>
+      <HBox alignment="CENTER_RIGHT" prefHeight="50.0" spacing="10" style="-fx-background-color: -fx-surface; -fx-padding: 0 10 0 10; -fx-border-color: -fx-subtle-border; -fx-border-width: 0 0 1 0;">
+         <children>
+            <Label fx:id="shiftStatusLabel" text="No Active Shift" />
+            <Label fx:id="currentUserLabel" text="Not Logged In" />
+         </children>
+      </HBox>
+   </top>
 </BorderPane>

@@ -1,7 +1,7 @@
 package com.yourcompany.cafeteria.service;
 
-import com.yourcompany.cafeteria.util.SessionManager;
 import com.yourcompany.cafeteria.model.User;
+import com.yourcompany.cafeteria.util.SessionManager;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

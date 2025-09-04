@@ -28,6 +28,7 @@ public class MainApp extends Application {
         Parent root = FXMLLoader.load(mainViewUrl);
 
         Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getResource("/application.css").toExternalForm());
 
         primaryStage.setTitle("Cafeteria POS");
         primaryStage.setScene(scene);

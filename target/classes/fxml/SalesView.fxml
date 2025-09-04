@@ -1,60 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.SalesController"
-            xmlns="http://javafx.com/javafx/21"
-            prefHeight="600.0" prefWidth="1000.0">
-    <top>
-        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10; -fx-background-color: #f0f0f0;">
-            <Label text="Cafeteria POS" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-        </HBox>
-    </top>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.SalesController">
+    <left>
+        <VBox prefWidth="200.0" spacing="10" style="-fx-padding: 10;">
+            <children>
+                <Label text="Categories" styleClass="h2" />
+                <ListView fx:id="categoryListView" prefHeight="200.0" />
+                <TextField fx:id="searchField" promptText="Search items..." />
+            </children>
+        </VBox>
+    </left>
     <center>
-        <SplitPane dividerPositions="0.6" prefHeight="160.0" prefWidth="200.0">
-            <items>
-                <VBox spacing="8" style="-fx-padding: 10;">
-                    <children>
-                        <TextField fx:id="searchField" promptText="Search items..."/>
-                        <ListView fx:id="itemCatalogView" VBox.vgrow="ALWAYS"/>
-                    </children>
-                </VBox>
-                <VBox spacing="8" style="-fx-padding: 10;">
-                    <children>
-                        <Label text="Cart" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-                        <TableView fx:id="cartTable" VBox.vgrow="ALWAYS">
-                            <columns>
-                                <TableColumn fx:id="cartItemNameCol" prefWidth="180.0" text="Item"/>
-                                <TableColumn fx:id="cartQuantityCol" prefWidth="70.0" text="Qty"/>
-                                <TableColumn fx:id="cartPriceCol" prefWidth="100.0" text="Price"/>
-                            </columns>
-                        </TableView>
-                        <HBox alignment="CENTER_RIGHT" spacing="10">
-                            <children>
-                                <Label text="Discount:"/>
-                                <TextField fx:id="discountField" prefWidth="100.0" promptText="0.00"/>
-                            </children>
-                        </HBox>
-                        <HBox alignment="CENTER_RIGHT" spacing="10">
-                            <children>
-                                <Label text="Total:" style="-fx-font-weight: bold;"/>
-                                <Label fx:id="totalLabel" style="-fx-font-weight: bold;" text="0.00"/>
-                            </children>
-                        </HBox>
-                        <Button fx:id="finalizeButton" onAction="#handleFinalize" text="Finalize Sale" maxWidth="Infinity"/>
-                    </children>
-                </VBox>
-            </items>
-        </SplitPane>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+            <content>
+                <TilePane fx:id="itemGridPane" hgap="10" vgap="10" style="-fx-padding: 10;" />
+            </content>
+        </ScrollPane>
     </center>
+    <right>
+        <VBox prefWidth="300.0" spacing="10" style="-fx-background-color: -fx-surface; -fx-padding: 10;">
+            <children>
+                <Label text="Cart" styleClass="h1" />
+                <TableView fx:id="cartTable" prefHeight="400.0">
+                    <columns>
+                        <TableColumn fx:id="cartItemNameCol" prefWidth="150.0" text="Item" />
+                        <TableColumn fx:id="cartQuantityCol" prefWidth="50.0" text="Qty" />
+                        <TableColumn fx:id="cartPriceCol" prefWidth="75.0" text="Total" />
+                    </columns>
+                </TableView>
+                <HBox alignment="CENTER_LEFT" spacing="5">
+                    <children>
+                        <Label text="Discount:" />
+                        <TextField fx:id="discountField" prefWidth="100.0" />
+                    </children>
+                </HBox>
+                <Label fx:id="totalLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Total: 0.00" />
+                <VBox spacing="5">
+                    <children>
+                        <Label text="Payment Method:" />
+                        <ToggleGroup fx:id="paymentMethodToggleGroup">
+                            <toggles>
+                                <RadioButton fx:id="cashRadioButton" text="Cash" selected="true" />
+                                <RadioButton fx:id="bankRadioButton" text="Bank" />
+                            </toggles>
+                        </ToggleGroup>
+                    </children>
+                </VBox>
+                <Button fx:id="finalizeButton" onAction="#handleFinalize" text="Confirm Payment" maxWidth="Infinity" style="-fx-font-size: 16px;" />
+            </children>
+        </VBox>
+    </right>
 </BorderPane>

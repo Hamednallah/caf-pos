@@ -41,19 +41,17 @@ public class UsersService {
     }
 
     public void updateUser(User user, String plainTextPassword) throws SQLException {
-        // If a new password is provided, hash it and set it on the user object.
         if (plainTextPassword != null && !plainTextPassword.trim().isEmpty()) {
             String hashedPassword = BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
             user.setPasswordHash(hashedPassword);
         } else {
-            // Ensure we don't accidentally wipe the password if one isn't provided.
             user.setPasswordHash(null);
         }
         usersDAO.updateUser(user);
     }
 
     public void toggleUserStatus(int userId) throws SQLException {
-        User user = usersDAO.findById(userId); // This method doesn't exist yet, I'll need to add it.
+        User user = usersDAO.findById(userId);
         if (user != null) {
             usersDAO.updateUserStatus(userId, !user.isActive());
         }

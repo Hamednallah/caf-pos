@@ -54,7 +54,6 @@ public class UsersDAO {
   }
 
   public void updateUser(User user) throws SQLException {
-      // This query conditionally updates the password only if a new hash is provided.
       String sql = "UPDATE \"user\" SET username = ?, full_name = ?, role_id = ?, active = ?" +
               (user.getPasswordHash() != null && !user.getPasswordHash().isEmpty() ? ", password_hash = ?" : "") +
               " WHERE id = ?";
