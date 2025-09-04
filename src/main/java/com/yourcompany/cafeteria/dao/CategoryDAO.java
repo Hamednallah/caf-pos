@@ -31,4 +31,29 @@ public class CategoryDAO {
         }
         return categories;
     }
+
+    public Category addCategory(Category category) throws SQLException {
+        String sql = "INSERT INTO category (name, description) VALUES (?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, category.getName());
+            ps.setString(2, category.getDescription());
+            ps.executeUpdate();
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    category.setId(generatedKeys.getInt(1));
+                }
+            }
+        }
+        return category;
+    }
+
+    public void updateCategory(Category category) throws SQLException {
+        String sql = "UPDATE category SET name = ?, description = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, category.getName());
+            ps.setString(2, category.getDescription());
+            ps.setInt(3, category.getId());
+            ps.executeUpdate();
+        }
+    }
 }

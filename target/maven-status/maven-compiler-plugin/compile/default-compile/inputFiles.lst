@@ -9,10 +9,12 @@
 /app/src/main/java/com/yourcompany/cafeteria/dao/ShiftsDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/UsersDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/model/Category.java
+/app/src/main/java/com/yourcompany/cafeteria/model/DateRangeReport.java
 /app/src/main/java/com/yourcompany/cafeteria/model/Expense.java
 /app/src/main/java/com/yourcompany/cafeteria/model/Item.java
 /app/src/main/java/com/yourcompany/cafeteria/model/Order.java
 /app/src/main/java/com/yourcompany/cafeteria/model/OrderItem.java
+/app/src/main/java/com/yourcompany/cafeteria/model/Shift.java
 /app/src/main/java/com/yourcompany/cafeteria/model/ShiftReport.java
 /app/src/main/java/com/yourcompany/cafeteria/model/ShiftSummary.java
 /app/src/main/java/com/yourcompany/cafeteria/model/User.java
@@ -34,6 +36,7 @@
 /app/src/main/java/com/yourcompany/cafeteria/ui/SalesController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/SettingsController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ShiftsController.java
+/app/src/main/java/com/yourcompany/cafeteria/ui/UsersController.java
 /app/src/main/java/com/yourcompany/cafeteria/util/DataSourceProvider.java
 /app/src/main/java/com/yourcompany/cafeteria/util/EscPosBuilder.java
 /app/src/main/java/com/yourcompany/cafeteria/util/ReceiptPrinter.java

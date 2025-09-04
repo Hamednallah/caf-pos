@@ -1,6 +1,6 @@
 package com.yourcompany.cafeteria.ui;
 
-import com.yourcompany.cafeteria.model.ShiftReport;
+import com.yourcompany.cafeteria.model.ShiftSummary;
 import com.yourcompany.cafeteria.service.ReportsService;
 import com.yourcompany.cafeteria.service.ShiftService;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
@@ -74,7 +74,7 @@ public class ShiftsController {
         confirmation.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
             try (var c = DataSourceProvider.getConnection()) {
                 ReportsService reportsService = new ReportsService(c);
-                ShiftReport summary = reportsService.getShiftReport(SessionManager.getCurrentShiftId());
+                ShiftSummary summary = reportsService.getShiftSummary(SessionManager.getCurrentShiftId());
 
                 showShiftSummaryDialog(summary);
 
@@ -91,7 +91,7 @@ public class ShiftsController {
         });
     }
 
-    private void showShiftSummaryDialog(ShiftReport summary) {
+    private void showShiftSummaryDialog(ShiftSummary summary) {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
         dialog.setTitle("Shift Summary Report");
         dialog.setHeaderText("Summary for Shift #" + SessionManager.getCurrentShiftId());
@@ -104,11 +104,13 @@ public class ShiftsController {
         grid.add(new Label("Starting Float:"), 0, 0);
         grid.add(new Label(String.format("%.2f", summary.getStartingFloat())), 1, 0);
         grid.add(new Label("Total Cash Sales:"), 0, 1);
-        grid.add(new Label(String.format("%.2f", summary.getCashTotal())), 1, 1);
+        grid.add(new Label(String.format("%.2f", summary.getTotalCashSales())), 1, 1);
         grid.add(new Label("Total Bank Sales:"), 0, 2);
-        grid.add(new Label(String.format("%.2f", summary.getBankTotal())), 1, 2);
+        grid.add(new Label(String.format("%.2f", summary.getTotalBankSales())), 1, 2);
         grid.add(new Label("Total Expenses:"), 0, 3);
         grid.add(new Label(String.format("- %.2f", summary.getTotalExpenses())), 1, 3);
+        grid.add(new Label("Expected Cash:"), 0, 4);
+        grid.add(new Label(String.format("%.2f", summary.getExpectedCashInDrawer())), 1, 4);
 
         dialog.getDialogPane().setContent(grid);
         dialog.showAndWait();
