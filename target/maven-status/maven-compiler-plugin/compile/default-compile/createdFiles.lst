@@ -40,5 +40,6 @@ com/yourcompany/cafeteria/ui/UsersController.class
 com/yourcompany/cafeteria/dao/OrderItemsDAO.class
 com/yourcompany/cafeteria/util/SessionManager.class
 com/yourcompany/cafeteria/model/OrderItem.class
+com/yourcompany/cafeteria/ui/ResourceAwareController.class
 com/yourcompany/cafeteria/dao/ExpensesDAO.class
 com/yourcompany/cafeteria/util/EscPosBuilder.class

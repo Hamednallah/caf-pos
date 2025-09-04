@@ -20,8 +20,9 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class ItemsController {
+public class ItemsController implements ResourceAwareController {
 
     @FXML private TableView<Item> itemsTable;
     @FXML private TableColumn<Item, Integer> idColumn;
@@ -31,6 +32,12 @@ public class ItemsController {
 
     private ItemsService itemsService;
     private CategoryDAO categoryDAO;
+    private ResourceBundle resources;
+
+    @Override
+    public void setResources(ResourceBundle resources) {
+        this.resources = resources;
+    }
 
     @FXML
     public void initialize() {
@@ -58,7 +65,7 @@ public class ItemsController {
             itemsTable.setItems(FXCollections.observableArrayList(allItems));
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Load Error", "Could not load items from the database.");
+            showError("Load Error", resources.getString("error.load.items"));
         }
     }
 
@@ -73,7 +80,7 @@ public class ItemsController {
         if (selectedItem != null) {
             showItemDialog(selectedItem);
         } else {
-            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select an item to edit.");
+            showAlert(Alert.AlertType.WARNING, resources.getString("dialog.warning"), resources.getString("prompt.select"));
         }
     }
 
@@ -82,25 +89,25 @@ public class ItemsController {
         Item selectedItem = itemsTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmation.setTitle("Delete Item");
-            confirmation.setHeaderText("Are you sure you want to delete '" + selectedItem.getName() + "'?");
+            confirmation.setTitle(resources.getString("dialog.confirmation"));
+            confirmation.setHeaderText(String.format(resources.getString("prompt.delete.confirm"), selectedItem.getName()));
             confirmation.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
                 try {
                     itemsService.delete(selectedItem.getId());
                     loadItems();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    showError("Delete Error", "Could not delete the selected item.");
+                    showError("Delete Error", resources.getString("error.delete.item"));
                 }
             });
         } else {
-            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select an item to delete.");
+            showAlert(Alert.AlertType.WARNING, resources.getString("dialog.warning"), resources.getString("prompt.select"));
         }
     }
 
     private void showItemDialog(Item item) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ItemDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ItemDialog.fxml"), resources);
             Stage dialogStage = new Stage();
             dialogStage.setTitle(item.getId() == 0 ? "Add Item" : "Edit Item");
             dialogStage.initModality(Modality.WINDOW_MODAL);
@@ -139,7 +146,7 @@ public class ItemsController {
                     dialogStage.close();
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    showError("Save Error", "Could not save item. Check all fields.");
+                    showError("Save Error", resources.getString("error.save.item"));
                 }
             });
 
@@ -163,7 +170,7 @@ public class ItemsController {
 
         } catch (IOException | SQLException e) {
             e.printStackTrace();
-            showError("Dialog Error", "Could not open the item dialog.");
+            showError("Dialog Error", resources.getString("error.dialog.item"));
         }
     }
 
@@ -172,7 +179,7 @@ public class ItemsController {
         dialog.setTitle("Add New Category");
         dialog.setHeaderText("Enter details for the new category.");
 
-        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        ButtonType saveButtonType = new ButtonType(resources.getString("button.save"), ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
         GridPane grid = new GridPane();
@@ -200,7 +207,7 @@ public class ItemsController {
                     return categoryDAO.addCategory(newCategory);
                 } catch (SQLException e) {
                     e.printStackTrace();
-                    showError("Database Error", "Could not save the new category.");
+                    showError("Database Error", resources.getString("error.save.category"));
                     return null;
                 }
             }

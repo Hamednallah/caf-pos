@@ -33,6 +33,7 @@
 /app/src/main/java/com/yourcompany/cafeteria/ui/MainController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ReceiptController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ReportsController.java
+/app/src/main/java/com/yourcompany/cafeteria/ui/ResourceAwareController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/SalesController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/SettingsController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ShiftsController.java

@@ -19,7 +19,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.ReportsController">
     <top>
-        <Label styleClass="view-title" text="Reports" BorderPane.alignment="CENTER_LEFT">
+        <Label styleClass="view-title" text="%reports.title" BorderPane.alignment="CENTER_LEFT">
             <BorderPane.margin>
                 <Insets bottom="10" left="10" right="10" top="10" />
             </BorderPane.margin>
@@ -28,18 +28,18 @@
     <center>
         <TabPane>
             <tabs>
-                <Tab text="Daily Sales">
+                <Tab text="%reports.tab.daily">
                     <content>
                         <VBox spacing="10" style="-fx-padding: 10;">
                             <HBox alignment="CENTER_LEFT" spacing="10">
-                                <Label text="Select Date:" />
+                                <Label text="%reports.label.selectDate" />
                                 <DatePicker fx:id="dailySalesReportDatePicker" />
                             </HBox>
                             <TableView fx:id="dailySalesReportTable">
                                 <columns>
-                                    <TableColumn fx:id="itemNameColumn" prefWidth="200.0" text="Item Name" />
+                                    <TableColumn fx:id="itemNameColumn" prefWidth="200.0" text="%items.table.name" />
                                     <TableColumn fx:id="quantitySoldColumn" prefWidth="100.0" text="Quantity Sold" />
-                                    <TableColumn fx:id="totalSalesColumn" prefWidth="150.0" text="Total Sales" />
+                                    <TableColumn fx:id="totalSalesColumn" prefWidth="150.0" text="%reports.label.totalSales" />
                                 </columns>
                             </TableView>
                             <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
@@ -48,38 +48,38 @@
                         </VBox>
                     </content>
                 </Tab>
-                <Tab text="Date Range Report">
+                <Tab text="%reports.tab.dateRange">
                     <content>
                         <VBox spacing="10" style="-fx-padding: 10;">
                             <HBox alignment="CENTER_LEFT" spacing="10">
-                                <Label text="Start Date:" />
+                                <Label text="%reports.label.startDate" />
                                 <DatePicker fx:id="dateRangeStartDatePicker" />
-                                <Label text="End Date:" />
+                                <Label text="%reports.label.endDate" />
                                 <DatePicker fx:id="dateRangeEndDatePicker" />
-                                <Button fx:id="generateReportButton" onAction="#handleGenerateDateRangeReport" text="Generate Report" />
+                                <Button fx:id="generateReportButton" onAction="#handleGenerateDateRangeReport" text="%reports.button.generate" />
                             </HBox>
                             <GridPane hgap="10" vgap="5" style="-fx-padding: 10 0 0 0;">
-                                <Label text="Total Sales:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                <Label text="%reports.label.totalSales" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                                 <Label fx:id="totalSalesLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                                <Label text="Total Orders:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                <Label text="%reports.label.totalOrders" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                                 <Label fx:id="totalOrdersLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                             </GridPane>
-                            <BarChart fx:id="salesChart" title="Sales Trend">
+                            <BarChart fx:id="salesChart" title="%reports.chart.salesTrend">
                                 <xAxis>
-                                    <CategoryAxis label="Date" />
+                                    <CategoryAxis label="%reports.chart.axis.date" />
                                 </xAxis>
                                 <yAxis>
-                                    <NumberAxis label="Total Sales" />
+                                    <NumberAxis label="%reports.chart.axis.totalSales" />
                                 </yAxis>
                             </BarChart>
                         </VBox>
                     </content>
                 </Tab>
-                <Tab text="Shift Reports">
+                <Tab text="%reports.tab.shift">
                     <content>
                         <VBox spacing="10" style="-fx-padding: 10;">
                             <HBox alignment="CENTER_LEFT" spacing="10">
-                                <Label text="Select Shift:" />
+                                <Label text="%reports.label.selectShift" />
                                 <ComboBox fx:id="shiftSelectorComboBox" prefWidth="300.0" />
                             </HBox>
                             <GridPane fx:id="shiftReportGrid" hgap="10" vgap="5" style="-fx-padding: 10 0 0 0;">

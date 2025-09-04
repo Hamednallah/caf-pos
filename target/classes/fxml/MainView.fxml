@@ -12,18 +12,18 @@
     <left>
         <VBox prefWidth="200.0" spacing="10" style="-fx-background-color: -fx-surface; -fx-padding: 10;">
             <children>
-                <Label styleClass="h1" text="Cafeteria POS">
+                <Label styleClass="h1" text="%main.title">
                     <VBox.margin>
                         <Insets bottom="20.0" />
                     </VBox.margin>
                 </Label>
-                <Button onAction="#showSalesView" styleClass="sidebar-button" text="Sales" maxWidth="Infinity"/>
-                <Button onAction="#showItemsView" styleClass="sidebar-button" text="Items" maxWidth="Infinity"/>
-                <Button onAction="#showShiftsView" styleClass="sidebar-button" text="Shifts" maxWidth="Infinity"/>
-                <Button onAction="#showExpensesView" styleClass="sidebar-button" text="Expenses" maxWidth="Infinity"/>
-                <Button onAction="#showReportsView" styleClass="sidebar-button" text="Reports" maxWidth="Infinity"/>
-                <Button fx:id="usersButton" onAction="#showUsersView" styleClass="sidebar-button" text="Users" maxWidth="Infinity"/>
-                <Button onAction="#showSettingsView" styleClass="sidebar-button" text="Settings" maxWidth="Infinity"/>
+                <Button onAction="#showSalesView" styleClass="sidebar-button" text="%main.button.sales" maxWidth="Infinity"/>
+                <Button onAction="#showItemsView" styleClass="sidebar-button" text="%main.button.items" maxWidth="Infinity"/>
+                <Button onAction="#showShiftsView" styleClass="sidebar-button" text="%main.button.shifts" maxWidth="Infinity"/>
+                <Button onAction="#showExpensesView" styleClass="sidebar-button" text="%main.button.expenses" maxWidth="Infinity"/>
+                <Button onAction="#showReportsView" styleClass="sidebar-button" text="%main.button.reports" maxWidth="Infinity"/>
+                <Button fx:id="usersButton" onAction="#showUsersView" styleClass="sidebar-button" text="%main.button.users" maxWidth="Infinity"/>
+                <Button onAction="#showSettingsView" styleClass="sidebar-button" text="%main.button.settings" maxWidth="Infinity"/>
             </children>
         </VBox>
     </left>

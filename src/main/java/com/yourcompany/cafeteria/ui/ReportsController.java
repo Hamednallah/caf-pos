@@ -12,15 +12,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
-
-import java.io.File;
-import java.io.PrintWriter;
-import java.math.BigDecimal;
-import javafx.scene.chart.XYChart;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -30,12 +26,14 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
-public class ReportsController {
+public class ReportsController implements ResourceAwareController {
 
     // Common Services
     private ReportsService reportsService;
     private ShiftService shiftService;
+    private ResourceBundle resources;
 
     // Daily Sales Tab
     @FXML private DatePicker dailySalesReportDatePicker;
@@ -57,6 +55,11 @@ public class ReportsController {
     @FXML private ComboBox<Shift> shiftSelectorComboBox;
     @FXML private GridPane shiftReportGrid;
 
+    @Override
+    public void setResources(ResourceBundle resources) {
+        this.resources = resources;
+    }
+
     @FXML
     public void initialize() {
         try {
@@ -75,9 +78,10 @@ public class ReportsController {
     @FXML
     private void handleExportDailySales() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Daily Sales Report");
-        fileChooser.setInitialFileName("daily_sales_" + dailySalesReportDatePicker.getValue() + ".csv");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        fileChooser.setTitle(resources.getString("export.csv.title"));
+        String initialFileName = String.format(resources.getString("export.csv.daily.filename"), dailySalesReportDatePicker.getValue());
+        fileChooser.setInitialFileName(initialFileName);
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(resources.getString("files.csv"), "*.csv"));
         File file = fileChooser.showSaveDialog(dailySalesReportTable.getScene().getWindow());
 
         if (file != null) {
@@ -90,9 +94,9 @@ public class ReportsController {
                             item.getTotalSales()
                     );
                 }
-                showAlert(Alert.AlertType.INFORMATION, "Export Successful", "Report saved to " + file.getAbsolutePath());
+                showAlert(Alert.AlertType.INFORMATION, "Export Successful", String.format(resources.getString("export.csv.success"), file.getAbsolutePath()));
             } catch (Exception e) {
-                showError("Export Failed", "Could not save the report: " + e.getMessage());
+                showError("Export Failed", String.format(resources.getString("export.csv.fail"), e.getMessage()));
             }
         }
     }
@@ -130,7 +134,7 @@ public class ReportsController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Report Error", "Failed to generate daily sales report.");
+            showError("Report Error", resources.getString("error.report.daily"));
         }
     }
 
@@ -166,7 +170,7 @@ public class ReportsController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Report Error", "Failed to generate date range report.");
+            showError("Report Error", resources.getString("error.report.dateRange"));
         }
     }
 
@@ -203,7 +207,7 @@ public class ReportsController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Shift Summary Error", "Could not load summary for the selected shift.");
+            showError("Shift Summary Error", resources.getString("error.shift.summary"));
         }
     }
 

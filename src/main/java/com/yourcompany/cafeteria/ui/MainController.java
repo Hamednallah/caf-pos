@@ -13,8 +13,11 @@ import javafx.scene.layout.BorderPane;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ResourceBundle;
 
-public class MainController {
+public class MainController implements ResourceAwareController {
+
+    private ResourceBundle resources;
 
     @FXML
     private BorderPane contentPane;
@@ -24,6 +27,25 @@ public class MainController {
     private Label shiftStatusLabel;
     @FXML
     private Label currentUserLabel;
+
+    public void setResources(ResourceBundle resources) {
+        this.resources = resources;
+        updateLabels();
+    }
+
+    private void updateLabels() {
+        if (SessionManager.getCurrentUser() != null) {
+            currentUserLabel.setText(resources.getString("main.label.currentUser") + " " + SessionManager.getCurrentUser().getFullName());
+        } else {
+            currentUserLabel.setText(resources.getString("main.label.notLoggedIn"));
+        }
+
+        if (SessionManager.isShiftActive()) {
+            shiftStatusLabel.setText(String.format(resources.getString("main.shift.active"), SessionManager.getCurrentShiftId()));
+        } else {
+            shiftStatusLabel.setText(resources.getString("main.shift.none"));
+        }
+    }
 
     @FXML
     public void initialize() {
@@ -38,7 +60,6 @@ public class MainController {
 
         // Apply role-based access control
         if (SessionManager.getCurrentUser() != null) {
-            currentUserLabel.setText("User: " + SessionManager.getCurrentUser().getFullName());
             if (SessionManager.getCurrentUser().getRoleId() == 1) { // ADMIN
                 usersButton.setVisible(true);
                 usersButton.setManaged(true);
@@ -47,16 +68,8 @@ public class MainController {
                 usersButton.setManaged(false);
             }
         } else {
-            currentUserLabel.setText("Not Logged In");
             usersButton.setVisible(false);
             usersButton.setManaged(false);
-        }
-
-        // Update shift status
-        if (SessionManager.isShiftActive()) {
-            shiftStatusLabel.setText("Shift #" + SessionManager.getCurrentShiftId() + " is Active");
-        } else {
-            shiftStatusLabel.setText("No Active Shift");
         }
 
         // Load the default view on startup
@@ -104,7 +117,12 @@ public class MainController {
             if (url == null) {
                 throw new IOException("Cannot find FXML file: " + fxmlPath);
             }
-            Parent view = FXMLLoader.load(url);
+            FXMLLoader loader = new FXMLLoader(url, resources);
+            Parent view = loader.load();
+            Object controller = loader.getController();
+            if (controller instanceof ResourceAwareController) {
+                ((ResourceAwareController) controller).setResources(resources);
+            }
             contentPane.setCenter(view);
         } catch (IOException e) {
             e.printStackTrace();

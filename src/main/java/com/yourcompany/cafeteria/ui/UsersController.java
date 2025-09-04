@@ -15,8 +15,9 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.ResourceBundle;
 
-public class UsersController {
+public class UsersController implements ResourceAwareController {
 
     @FXML private TableView<User> usersTable;
     @FXML private TableColumn<User, Integer> idColumn;
@@ -26,6 +27,12 @@ public class UsersController {
     @FXML private TableColumn<User, Boolean> activeColumn;
 
     private UsersService usersService;
+    private ResourceBundle resources;
+
+    @Override
+    public void setResources(ResourceBundle resources) {
+        this.resources = resources;
+    }
 
     @FXML
     public void initialize() {
@@ -53,7 +60,7 @@ public class UsersController {
             usersTable.setItems(FXCollections.observableArrayList(users));
         } catch (SQLException e) {
             e.printStackTrace();
-            showError("Load Error", "Failed to load users from the database.");
+            showError("Load Error", resources.getString("error.load.users"));
         }
     }
 
@@ -81,7 +88,7 @@ public class UsersController {
                 loadUsers(); // Refresh the table
             } catch (SQLException e) {
                 e.printStackTrace();
-                showError("Database Error", "Failed to update user status.");
+                showError("Database Error", resources.getString("error.update.user.status"));
             }
         } else {
             showAlert("No Selection", "Please select a user to toggle their status.");
@@ -90,7 +97,7 @@ public class UsersController {
 
     private void showUserDialog(User user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/UserDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/UserDialog.fxml"), resources);
             Stage dialogStage = new Stage();
             dialogStage.setTitle(user.getId() == null ? "Add User" : "Edit User");
             dialogStage.initModality(Modality.WINDOW_MODAL);
@@ -137,7 +144,7 @@ public class UsersController {
                     dialogStage.close();
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    showError("Save Error", "Could not save user. Check all fields.");
+                    showError("Save Error", resources.getString("error.save.user"));
                 }
             });
 
@@ -148,7 +155,7 @@ public class UsersController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            showError("Dialog Error", "Could not open the user dialog.");
+            showError("Dialog Error", resources.getString("error.dialog.user"));
         }
     }
 
