@@ -87,4 +87,22 @@ public class ReportsDAO {
     }
     return report;
   }
+
+  public java.util.Map<java.time.LocalDate, java.math.BigDecimal> getSalesByDay(java.time.LocalDate from, java.time.LocalDate to) throws SQLException {
+    java.util.Map<java.time.LocalDate, java.math.BigDecimal> salesByDay = new java.util.LinkedHashMap<>();
+    String sql = "SELECT CAST(created_at AS DATE) AS sale_date, SUM(total_amount) AS daily_sales " +
+                 "FROM \"order\" " +
+                 "WHERE created_at >= ? AND created_at < ? AND status = 'FINALIZED' AND payment_confirmed = TRUE " +
+                 "GROUP BY sale_date ORDER BY sale_date";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setTimestamp(1, Timestamp.valueOf(from.atStartOfDay()));
+      ps.setTimestamp(2, Timestamp.valueOf(to.plusDays(1).atStartOfDay()));
+      try (ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+          salesByDay.put(rs.getDate("sale_date").toLocalDate(), rs.getBigDecimal("daily_sales"));
+        }
+      }
+    }
+    return salesByDay;
+  }
 }

@@ -1,101 +1,229 @@
 package com.yourcompany.cafeteria.ui;
 
+import com.yourcompany.cafeteria.dao.CategoryDAO;
+import com.yourcompany.cafeteria.model.Category;
 import com.yourcompany.cafeteria.model.Item;
 import com.yourcompany.cafeteria.service.ItemsService;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 public class ItemsController {
 
-    @FXML
-    private TilePane itemGridPane;
+    @FXML private TableView<Item> itemsTable;
+    @FXML private TableColumn<Item, Integer> idColumn;
+    @FXML private TableColumn<Item, String> nameColumn;
+    @FXML private TableColumn<Item, BigDecimal> priceColumn;
+    @FXML private TableColumn<Item, Category> categoryColumn;
 
     private ItemsService itemsService;
+    private CategoryDAO categoryDAO;
 
     @FXML
     public void initialize() {
         try {
             itemsService = new ItemsService(DataSourceProvider.getConnection());
+            categoryDAO = new CategoryDAO(DataSourceProvider.getConnection());
+            setupTableColumns();
             loadItems();
         } catch (Exception e) {
-            e.printStackTrace(); // Show error
+            e.printStackTrace();
+            showError("Initialization Error", "Could not initialize the Items view.");
         }
+    }
+
+    private void setupTableColumns() {
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
     }
 
     private void loadItems() {
-        itemGridPane.getChildren().clear();
         try {
             List<Item> allItems = itemsService.listAll();
-            for (Item item : allItems) {
-                itemGridPane.getChildren().add(createItemCard(item));
-            }
+            itemsTable.setItems(FXCollections.observableArrayList(allItems));
         } catch (Exception e) {
-            e.printStackTrace(); // Show error
+            e.printStackTrace();
+            showError("Load Error", "Could not load items from the database.");
         }
-    }
-
-    private Node createItemCard(Item item) {
-        VBox card = new VBox(10);
-        card.setAlignment(Pos.CENTER);
-        card.setStyle("-fx-background-color: -fx-surface; -fx-padding: 10; -fx-border-color: -fx-subtle-border; -fx-border-width: 1; -fx-background-radius: 8; -fx-border-radius: 8;");
-        card.setPrefSize(150, 120);
-
-        Label nameLabel = new Label(item.getName());
-        nameLabel.setStyle("-fx-font-weight: bold;");
-        Label priceLabel = new Label(String.format("Price: %.2f", item.getPrice()));
-
-        Button editButton = new Button("Edit");
-        editButton.setOnAction(event -> handleEditItem(item));
-
-        Button deleteButton = new Button("Delete");
-        deleteButton.setStyle("-fx-background-color: #EF4444;"); // Red color for delete
-        deleteButton.setOnAction(event -> handleDeleteItem(item));
-
-        HBox buttonBox = new HBox(5, editButton, deleteButton);
-        buttonBox.setAlignment(Pos.CENTER);
-
-        card.getChildren().addAll(nameLabel, priceLabel, buttonBox);
-        return card;
     }
 
     @FXML
     private void handleAddItem() {
-        System.out.println("Add item clicked");
-        // Logic to show an add item dialog will go here
+        showItemDialog(new Item());
     }
 
-    private void handleEditItem(Item item) {
-        System.out.println("Edit item clicked: " + item.getName());
-        // Logic to show an edit item dialog will go here
-    }
-
-    private void handleDeleteItem(Item item) {
-        System.out.println("Delete item clicked: " + item.getName());
-        // Logic to show a confirmation and delete the item
-        try {
-            // Show confirmation dialog first
-            itemsService.delete(item.getId());
-            loadItems(); // Refresh grid
-        } catch (Exception e) {
-            e.printStackTrace(); // Show error
+    @FXML
+    private void handleEditItem() {
+        Item selectedItem = itemsTable.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            showItemDialog(selectedItem);
+        } else {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select an item to edit.");
         }
     }
+
+    @FXML
+    private void handleDeleteItem() {
+        Item selectedItem = itemsTable.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmation.setTitle("Delete Item");
+            confirmation.setHeaderText("Are you sure you want to delete '" + selectedItem.getName() + "'?");
+            confirmation.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
+                try {
+                    itemsService.delete(selectedItem.getId());
+                    loadItems();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showError("Delete Error", "Could not delete the selected item.");
+                }
+            });
+        } else {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select an item to delete.");
+        }
+    }
+
+    private void showItemDialog(Item item) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ItemDialog.fxml"));
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle(item.getId() == 0 ? "Add Item" : "Edit Item");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(itemsTable.getScene().getWindow());
+            Scene scene = new Scene(loader.load());
+            dialogStage.setScene(scene);
+
+            // Setup Dialog Fields
+            TextField nameField = (TextField) scene.lookup("#nameField");
+            TextField priceField = (TextField) scene.lookup("#priceField");
+            ComboBox<Category> categoryComboBox = (ComboBox<Category>) scene.lookup("#categoryComboBox");
+
+            // Load categories
+            categoryComboBox.setItems(FXCollections.observableArrayList(categoryDAO.listAll()));
+
+            if (item.getId() != 0) {
+                nameField.setText(item.getName());
+                priceField.setText(item.getPrice().toPlainString());
+                categoryComboBox.setValue(item.getCategory());
+            }
+
+            // Setup Buttons
+            Button saveButton = (Button) scene.lookup("#saveButton");
+            saveButton.setOnAction(e -> {
+                try {
+                    item.setName(nameField.getText());
+                    item.setPrice(new BigDecimal(priceField.getText()));
+                    item.setCategory(categoryComboBox.getValue());
+                    item.setCategoryId(categoryComboBox.getValue().getId());
+                    if (item.getId() == 0) {
+                        itemsService.add(item);
+                    } else {
+                        itemsService.update(item);
+                    }
+                    loadItems();
+                    dialogStage.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    showError("Save Error", "Could not save item. Check all fields.");
+                }
+            });
+
+            Button cancelButton = (Button) scene.lookup("#cancelButton");
+            cancelButton.setOnAction(e -> dialogStage.close());
+
+            Button addCategoryButton = (Button) scene.lookup("#addCategoryButton");
+            addCategoryButton.setOnAction(e -> {
+                showAddCategoryDialog().ifPresent(newCategory -> {
+                    try {
+                        categoryComboBox.setItems(FXCollections.observableArrayList(categoryDAO.listAll()));
+                        categoryComboBox.setValue(newCategory);
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            });
+
+
+            dialogStage.showAndWait();
+
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+            showError("Dialog Error", "Could not open the item dialog.");
+        }
+    }
+
+    private Optional<Category> showAddCategoryDialog() {
+        Dialog<Category> dialog = new Dialog<>();
+        dialog.setTitle("Add New Category");
+        dialog.setHeaderText("Enter details for the new category.");
+
+        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField nameField = new TextField();
+        nameField.setPromptText("Name");
+        TextField descriptionField = new TextField();
+        descriptionField.setPromptText("Description");
+
+        grid.add(new Label("Name:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(new Label("Description:"), 0, 1);
+        grid.add(descriptionField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                Category newCategory = new Category();
+                newCategory.setName(nameField.getText());
+                newCategory.setDescription(descriptionField.getText());
+                try {
+                    return categoryDAO.addCategory(newCategory);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    showError("Database Error", "Could not save the new category.");
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        return dialog.showAndWait();
+    }
+
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showError(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
         alert.showAndWait();
     }
 }

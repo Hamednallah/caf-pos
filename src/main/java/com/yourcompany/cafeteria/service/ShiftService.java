@@ -27,4 +27,8 @@ public class ShiftService {
     public ResultSet getActiveShiftForCashier(int cashierId) throws Exception {
         return dao.getActiveShiftForCashier(cashierId);
     }
+
+    public java.util.List<com.yourcompany.cafeteria.model.Shift> getAllShifts() throws Exception {
+        return dao.getAllShifts();
+    }
 }

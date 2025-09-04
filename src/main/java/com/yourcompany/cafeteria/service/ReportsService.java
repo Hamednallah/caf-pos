@@ -79,4 +79,12 @@ public class ReportsService {
 
         return summary;
     }
+
+    public com.yourcompany.cafeteria.model.DateRangeReport getDateRangeReport(java.time.LocalDate from, java.time.LocalDate to) throws Exception {
+        return dao.getDateRangeReport(from, to);
+    }
+
+    public java.util.Map<java.time.LocalDate, java.math.BigDecimal> getSalesByDay(java.time.LocalDate from, java.time.LocalDate to) throws Exception {
+        return dao.getSalesByDay(from, to);
+    }
 }

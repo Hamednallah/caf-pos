@@ -1,32 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.ReportsController"
-      xmlns="http://javafx.com/javafx/21" spacing="10" style="-fx-padding: 10;">
-    <children>
-        <Label text="Daily Sales Report" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <children>
-                <Label text="Select Date:"/>
-                <DatePicker fx:id="datePicker"/>
-                <Button text="Generate Report" onAction="#handleGenerateReport"/>
-                <Button fx:id="exportButton" text="Export to CSV" onAction="#handleExportCsv" disable="true"/>
-            </children>
-        </HBox>
-        <TableView fx:id="reportTable" VBox.vgrow="ALWAYS">
-            <columns>
-                <TableColumn fx:id="itemNameCol" prefWidth="350.0" text="Item Name"/>
-                <TableColumn fx:id="quantityCol" prefWidth="150.0" text="Total Quantity Sold"/>
-                <TableColumn fx:id="salesCol" prefWidth="200.0" text="Total Sales"/>
-            </columns>
-        </TableView>
-    </children>
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.ReportsController">
+    <top>
+        <Label styleClass="view-title" text="Reports" BorderPane.alignment="CENTER_LEFT">
+            <BorderPane.margin>
+                <Insets bottom="10" left="10" right="10" top="10" />
+            </BorderPane.margin>
+        </Label>
+    </top>
+    <center>
+        <TabPane>
+            <tabs>
+                <Tab text="Daily Sales">
+                    <content>
+                        <VBox spacing="10" style="-fx-padding: 10;">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="Select Date:" />
+                                <DatePicker fx:id="dailySalesReportDatePicker" />
+                            </HBox>
+                            <TableView fx:id="dailySalesReportTable">
+                                <columns>
+                                    <TableColumn fx:id="itemNameColumn" prefWidth="200.0" text="Item Name" />
+                                    <TableColumn fx:id="quantitySoldColumn" prefWidth="100.0" text="Quantity Sold" />
+                                    <TableColumn fx:id="totalSalesColumn" prefWidth="150.0" text="Total Sales" />
+                                </columns>
+                            </TableView>
+                            <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                                <Button fx:id="exportDailySalesButton" onAction="#handleExportDailySales" text="Export to CSV" />
+                            </HBox>
+                        </VBox>
+                    </content>
+                </Tab>
+                <Tab text="Date Range Report">
+                    <content>
+                        <VBox spacing="10" style="-fx-padding: 10;">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="Start Date:" />
+                                <DatePicker fx:id="dateRangeStartDatePicker" />
+                                <Label text="End Date:" />
+                                <DatePicker fx:id="dateRangeEndDatePicker" />
+                                <Button fx:id="generateReportButton" onAction="#handleGenerateDateRangeReport" text="Generate Report" />
+                            </HBox>
+                            <GridPane hgap="10" vgap="5" style="-fx-padding: 10 0 0 0;">
+                                <Label text="Total Sales:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                <Label fx:id="totalSalesLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                <Label text="Total Orders:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                <Label fx:id="totalOrdersLabel" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            </GridPane>
+                            <BarChart fx:id="salesChart" title="Sales Trend">
+                                <xAxis>
+                                    <CategoryAxis label="Date" />
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Total Sales" />
+                                </yAxis>
+                            </BarChart>
+                        </VBox>
+                    </content>
+                </Tab>
+                <Tab text="Shift Reports">
+                    <content>
+                        <VBox spacing="10" style="-fx-padding: 10;">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="Select Shift:" />
+                                <ComboBox fx:id="shiftSelectorComboBox" prefWidth="300.0" />
+                            </HBox>
+                            <GridPane fx:id="shiftReportGrid" hgap="10" vgap="5" style="-fx-padding: 10 0 0 0;">
+                                <!-- Shift details will be populated here by the controller -->
+                            </GridPane>
+                        </VBox>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>

@@ -1,4 +1,8 @@
 package com.yourcompany.cafeteria.dao;
+
+import com.yourcompany.cafeteria.model.Shift;
+import com.yourcompany.cafeteria.model.User;
+
 import java.sql.*;
 public class ShiftsDAO {
   private final Connection conn; public ShiftsDAO(Connection c){ this.conn=c; }
@@ -12,4 +16,30 @@ public class ShiftsDAO {
     ps.setInt(1, shiftId);
     return ps.executeQuery();
   }
+
+    public java.util.List<Shift> getAllShifts() throws Exception {
+        java.util.List<Shift> shifts = new java.util.ArrayList<>();
+        String sql = "SELECT s.id, s.start_time, s.end_time, s.starting_float, s.cashier_id, u.full_name as cashier_name " +
+                     "FROM shift s JOIN \"user\" u ON s.cashier_id = u.id ORDER BY s.start_time DESC";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Shift shift = new Shift();
+                shift.setId(rs.getInt("id"));
+                shift.setStartTime(rs.getTimestamp("start_time").toLocalDateTime());
+                if (rs.getTimestamp("end_time") != null) {
+                    shift.setEndTime(rs.getTimestamp("end_time").toLocalDateTime());
+                }
+                shift.setStartingFloat(rs.getBigDecimal("starting_float"));
+
+                User cashier = new User();
+                cashier.setId(rs.getInt("cashier_id"));
+                cashier.setFullName(rs.getString("cashier_name"));
+                shift.setCashier(cashier);
+                shift.setCashierId(cashier.getId());
+                shifts.add(shift);
+            }
+        }
+        return shifts;
+    }
 }
