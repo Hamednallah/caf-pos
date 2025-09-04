@@ -5,6 +5,7 @@ import com.yourcompany.cafeteria.util.DataSourceProvider;
 import com.yourcompany.cafeteria.util.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,8 +14,9 @@ import javafx.scene.layout.BorderPane;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ResourceBundle;
 
-public class MainController {
+public class MainController implements Initializable {
 
     @FXML
     private BorderPane contentPane;
@@ -25,8 +27,12 @@ public class MainController {
     @FXML
     private Label currentUserLabel;
 
-    @FXML
-    public void initialize() {
+    private ResourceBundle resources;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
+
         // Perform startup checks before loading any views
         try (var c = DataSourceProvider.getConnection()) {
             StartupService startupService = new StartupService(c);
@@ -38,7 +44,7 @@ public class MainController {
 
         // Apply role-based access control
         if (SessionManager.getCurrentUser() != null) {
-            currentUserLabel.setText("User: " + SessionManager.getCurrentUser().getFullName());
+            currentUserLabel.setText(resources.getString("main.user") + ": " + SessionManager.getCurrentUser().getFullName());
             if (SessionManager.getCurrentUser().getRoleId() == 1) { // ADMIN
                 usersButton.setVisible(true);
                 usersButton.setManaged(true);
@@ -47,16 +53,16 @@ public class MainController {
                 usersButton.setManaged(false);
             }
         } else {
-            currentUserLabel.setText("Not Logged In");
+            currentUserLabel.setText(resources.getString("main.notLoggedIn"));
             usersButton.setVisible(false);
             usersButton.setManaged(false);
         }
 
         // Update shift status
         if (SessionManager.isShiftActive()) {
-            shiftStatusLabel.setText("Shift #" + SessionManager.getCurrentShiftId() + " is Active");
+            shiftStatusLabel.setText(resources.getString("main.activeShift") + " #" + SessionManager.getCurrentShiftId());
         } else {
-            shiftStatusLabel.setText("No Active Shift");
+            shiftStatusLabel.setText(resources.getString("main.noActiveShift"));
         }
 
         // Load the default view on startup
@@ -104,7 +110,8 @@ public class MainController {
             if (url == null) {
                 throw new IOException("Cannot find FXML file: " + fxmlPath);
             }
-            Parent view = FXMLLoader.load(url);
+            FXMLLoader loader = new FXMLLoader(url, resources);
+            Parent view = loader.load();
             contentPane.setCenter(view);
         } catch (IOException e) {
             e.printStackTrace();

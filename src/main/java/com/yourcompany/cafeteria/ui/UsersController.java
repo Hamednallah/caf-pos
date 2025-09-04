@@ -6,16 +6,18 @@ import com.yourcompany.cafeteria.util.DataSourceProvider;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class UsersController {
+public class UsersController implements Initializable {
 
     @FXML
     private TableView<User> usersTable;
@@ -29,9 +31,11 @@ public class UsersController {
     private TableColumn<User, Boolean> activeColumn;
 
     private UsersService usersService;
+    private ResourceBundle resources;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
         try {
             usersService = new UsersService(DataSourceProvider.getConnection());
         } catch (Exception e) {
@@ -88,12 +92,12 @@ public class UsersController {
 
     private void showUserDialog(User user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/UserDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/UserDialog.fxml"), resources);
             DialogPane dialogPane = loader.load();
 
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setDialogPane(dialogPane);
-            dialog.setTitle(user == null ? "Add User" : "Edit User");
+            dialog.setTitle(user == null ? resources.getString("users.dialog.addTitle") : resources.getString("users.dialog.editTitle"));
 
             TextField usernameField = (TextField) dialogPane.lookup("#usernameField");
             TextField fullNameField = (TextField) dialogPane.lookup("#fullNameField");
@@ -145,8 +149,6 @@ public class UsersController {
             e.printStackTrace();
         }
     }
-
-
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);

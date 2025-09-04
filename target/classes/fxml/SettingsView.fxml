@@ -10,17 +10,17 @@
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.SettingsController"
       xmlns="http://javafx.com/javafx/21" spacing="15" style="-fx-padding: 20;">
     <children>
-        <Label text="Application Settings" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+        <Label text="%settings.title" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
         <HBox spacing="10" alignment="CENTER_LEFT">
             <children>
-                <Label text="Default Receipt Printer:" minWidth="150"/>
-                <ComboBox fx:id="printerCombo" prefWidth="350.0" promptText="Select a printer"/>
+                <Label text="%settings.printer" minWidth="150"/>
+                <ComboBox fx:id="printerCombo" prefWidth="350.0" promptText="%settings.selectPrinter"/>
             </children>
         </HBox>
         <HBox spacing="10" alignment="CENTER_LEFT">
             <children>
-                <Button fx:id="saveButton" text="Save Settings" onAction="#handleSaveSettings"/>
-                <Button fx:id="testPrintButton" text="Test Print" onAction="#handleTestPrint"/>
+                <Button fx:id="saveButton" text="%settings.save" onAction="#handleSaveSettings"/>
+                <Button fx:id="testPrintButton" text="%settings.testPrint" onAction="#handleTestPrint"/>
             </children>
         </HBox>
         <Label fx:id="statusLabel" text=""/>

@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
@@ -19,10 +20,12 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.util.ResourceBundle;
 
-public class ReportsController {
+public class ReportsController implements Initializable {
 
     // Daily Sales Report
     @FXML private DatePicker dailyDatePicker;
@@ -43,9 +46,11 @@ public class ReportsController {
     @FXML private GridPane dateRangeReportGrid;
 
     private ReportsService reportsService;
+    private ResourceBundle resources;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
         try {
             reportsService = new ReportsService(DataSourceProvider.getConnection());
         } catch (Exception e) {
@@ -133,20 +138,16 @@ public class ReportsController {
         shiftReportGrid.getChildren().clear();
         if (report == null) return;
 
-        shiftReportGrid.add(new Label("Starting Float:"), 0, 0);
+        shiftReportGrid.add(new Label(resources.getString("shifts.summary.startingFloat")), 0, 0);
         shiftReportGrid.add(new Label(String.format("%.2f", report.getStartingFloat())), 1, 0);
-        shiftReportGrid.add(new Label("Total Sales:"), 0, 1);
-        shiftReportGrid.add(new Label(String.format("%.2f", report.getTotalSales())), 1, 1);
-        shiftReportGrid.add(new Label("Total Discounts:"), 0, 2);
-        shiftReportGrid.add(new Label(String.format("%.2f", report.getTotalDiscounts())), 1, 2);
-        shiftReportGrid.add(new Label("Cash Total:"), 0, 3);
-        shiftReportGrid.add(new Label(String.format("%.2f", report.getCashTotal())), 1, 3);
-        shiftReportGrid.add(new Label("Bank Total:"), 0, 4);
-        shiftReportGrid.add(new Label(String.format("%.2f", report.getBankTotal())), 1, 4);
-        shiftReportGrid.add(new Label("Total Expenses:"), 0, 5);
-        shiftReportGrid.add(new Label(String.format("%.2f", report.getTotalExpenses())), 1, 5);
-        shiftReportGrid.add(new Label("Orders Count:"), 0, 6);
-        shiftReportGrid.add(new Label(String.valueOf(report.getOrdersCount())), 1, 6);
+        shiftReportGrid.add(new Label(resources.getString("shifts.summary.totalCashSales")), 0, 1);
+        shiftReportGrid.add(new Label(String.format("%.2f", report.getCashTotal())), 1, 1);
+        shiftReportGrid.add(new Label(resources.getString("shifts.summary.totalBankSales")), 0, 2);
+        shiftReportGrid.add(new Label(String.format("%.2f", report.getBankTotal())), 1, 2);
+        shiftReportGrid.add(new Label(resources.getString("shifts.summary.totalExpenses")), 0, 3);
+        shiftReportGrid.add(new Label(String.format("%.2f", report.getTotalExpenses())), 1, 3);
+        shiftReportGrid.add(new Label("Orders Count:"), 0, 4);
+        shiftReportGrid.add(new Label(String.valueOf(report.getOrdersCount())), 1, 4);
     }
 
     @FXML

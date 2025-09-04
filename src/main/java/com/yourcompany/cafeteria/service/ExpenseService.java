@@ -5,7 +5,7 @@ import com.yourcompany.cafeteria.model.Expense;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.util.List;
 
 public class ExpenseService {
     private final ExpensesDAO dao;
@@ -24,7 +24,7 @@ public class ExpenseService {
         return dao.insert(e);
     }
 
-    public ResultSet getExpensesByShift(int shiftId) throws Exception {
+    public List<Expense> getExpensesByShift(int shiftId) throws Exception {
         return dao.listByShift(shiftId);
     }
 

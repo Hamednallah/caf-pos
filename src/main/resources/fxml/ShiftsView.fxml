@@ -14,12 +14,12 @@
     <center>
         <VBox alignment="CENTER" spacing="20.0">
             <children>
-                <Label text="Shift Management" styleClass="h1" />
-                <Label fx:id="shiftStatusLabel" text="No active shift." >
+                <Label text="%shifts.manage" styleClass="h1" />
+                <Label fx:id="shiftStatusLabel" text="%shifts.noActive" >
                     <font><Font size="18.0" /></font>
                 </Label>
-                <Button fx:id="startShiftButton" onAction="#handleStartShift" text="Start New Shift" prefHeight="50.0" />
-                <Button fx:id="endShiftButton" onAction="#handleEndShift" text="End Current Shift" prefHeight="50.0" />
+                <Button fx:id="startShiftButton" onAction="#handleStartShift" text="%shifts.start" prefHeight="50.0" />
+                <Button fx:id="endShiftButton" onAction="#handleEndShift" text="%shifts.end" prefHeight="50.0" />
             </children>
         </VBox>
     </center>

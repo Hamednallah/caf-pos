@@ -8,25 +8,25 @@
     <top>
         <VBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10;">
             <children>
-                <Label text="Manage Expenses" styleClass="h1" />
-                <Label fx:id="shiftInfoLabel" text="No active shift." />
+                <Label text="%expenses.manage" styleClass="h1" />
+                <Label fx:id="shiftInfoLabel" text="%shifts.noActive" />
             </children>
         </VBox>
     </top>
     <center>
         <TableView fx:id="expensesTable">
             <columns>
-                <TableColumn fx:id="idCol" prefWidth="75.0" text="ID" />
-                <TableColumn fx:id="descriptionCol" prefWidth="300.0" text="Description" />
-                <TableColumn fx:id="amountCol" prefWidth="120.0" text="Amount" />
-                <TableColumn fx:id="dateCol" prefWidth="200.0" text="Date" />
+                <TableColumn fx:id="idCol" prefWidth="75.0" text="%expenses.id" />
+                <TableColumn fx:id="descriptionCol" prefWidth="300.0" text="%expenses.description" />
+                <TableColumn fx:id="amountCol" prefWidth="120.0" text="%expenses.amount" />
+                <TableColumn fx:id="dateCol" prefWidth="200.0" text="%expenses.date" />
             </columns>
         </TableView>
     </center>
     <bottom>
         <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10;">
             <children>
-                <Button fx:id="addExpenseButton" onAction="#handleAddExpense" text="Add Expense" />
+                <Button fx:id="addExpenseButton" onAction="#handleAddExpense" text="%expenses.add" />
             </children>
         </HBox>
     </bottom>

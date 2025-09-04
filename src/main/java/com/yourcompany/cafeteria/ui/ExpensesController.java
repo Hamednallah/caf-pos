@@ -5,20 +5,20 @@ import com.yourcompany.cafeteria.service.ExpenseService;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
 import com.yourcompany.cafeteria.util.SessionManager;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
+import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
-import javafx.util.Pair;
 
 import java.math.BigDecimal;
-import java.sql.ResultSet;
+import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class ExpensesController {
+public class ExpensesController implements Initializable {
 
     @FXML private Label shiftInfoLabel;
     @FXML private TableView<Expense> expensesTable;
@@ -28,81 +28,50 @@ public class ExpensesController {
     @FXML private TableColumn<Expense, LocalDateTime> dateCol;
     @FXML private Button addExpenseButton;
 
-    private ObservableList<Expense> expenseList = FXCollections.observableArrayList();
+    private ExpenseService expenseService;
+    private ResourceBundle resources;
 
-    @FXML
-    public void initialize() {
-        setupTable();
-        if (SessionManager.isShiftActive()) {
-            shiftInfoLabel.setText("Managing expenses for Shift #" + SessionManager.getCurrentShiftId());
-            shiftInfoLabel.setStyle("-fx-text-fill: green;");
-            addExpenseButton.setDisable(false);
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
+        try {
+            expenseService = new ExpenseService(DataSourceProvider.getConnection());
+            setupTable();
             loadExpenses();
-        } else {
-            shiftInfoLabel.setText("No active shift. Please start a shift to manage expenses.");
-            shiftInfoLabel.setStyle("-fx-text-fill: red;");
-            addExpenseButton.setDisable(true);
+            updateUIState();
+        } catch (Exception e) {
+            e.printStackTrace(); // Handle error
         }
     }
 
     private void setupTable() {
-        expensesTable.setItems(expenseList);
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
         amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
-        dateCol.setCellValueFactory(new PropertyValueFactory<>("recordedAt"));
+        dateCol.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
     }
 
-    private void loadExpenses() {
-        expenseList.clear();
-        try (var c = DataSourceProvider.getConnection()) {
-            ExpenseService expenseService = new ExpenseService(c);
-            ResultSet rs = expenseService.getExpensesByShift(SessionManager.getCurrentShiftId());
-            while (rs.next()) {
-                Expense expense = new Expense();
-                expense.setId(rs.getInt("id"));
-                expense.setDescription(rs.getString("description"));
-                expense.setAmount(rs.getBigDecimal("amount"));
-                expense.setRecordedAt(rs.getTimestamp("recorded_at").toLocalDateTime());
-                expense.setShiftId(rs.getInt("shift_id"));
-                expense.setRecordedBy(rs.getInt("recorded_by"));
-                expenseList.add(expense);
-            }
-        } catch (Exception e) {
-            showError("Database Error", "Failed to load expenses.", e.getMessage());
+    private void loadExpenses() throws Exception {
+        if (SessionManager.isShiftActive()) {
+            List<Expense> expenses = expenseService.getExpensesByShift(SessionManager.getCurrentShiftId());
+            expensesTable.setItems(FXCollections.observableArrayList(expenses));
+        }
+    }
+
+    private void updateUIState() {
+        boolean shiftActive = SessionManager.isShiftActive();
+        addExpenseButton.setDisable(!shiftActive);
+        if (shiftActive) {
+            shiftInfoLabel.setText("Shift #" + SessionManager.getCurrentShiftId() + " is active.");
+        } else {
+            shiftInfoLabel.setText(resources.getString("shifts.noActive"));
         }
     }
 
     @FXML
     private void handleAddExpense() {
-        showExpenseDialog().ifPresent(result -> {
-            String description = result.getKey();
-            BigDecimal amount = result.getValue();
-
-            Expense newExpense = new Expense();
-            newExpense.setDescription(description);
-            newExpense.setAmount(amount);
-            newExpense.setShiftId(SessionManager.getCurrentShiftId());
-            if (SessionManager.getCurrentUser() != null) {
-                newExpense.setRecordedBy(SessionManager.getCurrentUser().getId());
-            }
-            newExpense.setRecordedAt(LocalDateTime.now());
-
-            try (var c = DataSourceProvider.getConnection()) {
-                ExpenseService expenseService = new ExpenseService(c);
-                int id = expenseService.recordExpense(newExpense);
-                newExpense.setId(id);
-                expenseList.add(newExpense);
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Expense recorded successfully.");
-            } catch (Exception e) {
-                showError("Add Expense Failed", "Could not save the new expense.", e.getMessage());
-            }
-        });
-    }
-
-    private Optional<Pair<String, BigDecimal>> showExpenseDialog() {
-        Dialog<Pair<String, BigDecimal>> dialog = new Dialog<>();
-        dialog.setTitle("Add New Expense");
+        Dialog<Expense> dialog = new Dialog<>();
+        dialog.setTitle("Add Expense");
         dialog.setHeaderText("Enter expense details:");
 
         ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
@@ -111,7 +80,6 @@ public class ExpensesController {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
 
         TextField descriptionField = new TextField();
         descriptionField.setPromptText("Description");
@@ -127,38 +95,24 @@ public class ExpensesController {
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
-                try {
-                    String description = descriptionField.getText();
-                    BigDecimal amount = new BigDecimal(amountField.getText());
-                    if (description.isEmpty() || amount.compareTo(BigDecimal.ZERO) <= 0) {
-                        showError("Invalid Input", "Description cannot be empty and amount must be positive.", "");
-                        return null;
-                    }
-                    return new Pair<>(description, amount);
-                } catch (NumberFormatException e) {
-                    showError("Invalid Input", "Amount must be a valid number.", "");
-                    return null;
-                }
+                Expense newExpense = new Expense();
+                newExpense.setDescription(descriptionField.getText());
+                newExpense.setAmount(new BigDecimal(amountField.getText()));
+                newExpense.setShiftId(SessionManager.getCurrentShiftId());
+                newExpense.setRecordedBy(SessionManager.getCurrentUser().getId());
+                return newExpense;
             }
             return null;
         });
 
-        return dialog.showAndWait();
-    }
-
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private void showError(String title, String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
+        Optional<Expense> result = dialog.showAndWait();
+        result.ifPresent(expense -> {
+            try {
+                expenseService.recordExpense(expense);
+                loadExpenses();
+            } catch (Exception e) {
+                e.printStackTrace(); // Handle error
+            }
+        });
     }
 }

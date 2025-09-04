@@ -39,9 +39,14 @@ public class ReceiptPrinter {
      * @param data The byte array to print.
      */
     public static void print(byte[] data) throws Exception {
-        String printerName;
-        try (Connection c = DataSourceProvider.getConnection()) {
-            printerName = new SettingsService(c).get("printer.default");
+        print(null, data);
+    }
+
+    public static void print(String printerName, byte[] data) throws Exception {
+        if (printerName == null || printerName.trim().isEmpty()) {
+            try (Connection c = DataSourceProvider.getConnection()) {
+                printerName = new SettingsService(c).getSetting("printer.default");
+            }
         }
 
         if (printerName == null || printerName.trim().isEmpty()) {

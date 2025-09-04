@@ -11,6 +11,7 @@ import com.yourcompany.cafeteria.util.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -19,12 +20,14 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class SalesController {
+public class SalesController implements Initializable {
 
     @FXML private TextField searchField;
     @FXML private ListView<Category> categoryListView;
@@ -45,9 +48,11 @@ public class SalesController {
     private ObservableList<Item> allItems = FXCollections.observableArrayList();
     private ObservableList<Category> allCategories = FXCollections.observableArrayList();
     private ObservableList<OrderItem> cart = FXCollections.observableArrayList();
+    private ResourceBundle resources;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
         try {
             itemsService = new ItemsService(DataSourceProvider.getConnection());
             ordersService = new OrdersService(DataSourceProvider.getConnection());
@@ -56,6 +61,7 @@ public class SalesController {
             loadItems();
             setupEventListeners();
             finalizeButton.setDisable(!SessionManager.isShiftActive());
+            updateTotals();
         } catch (Exception e) {
             showError("Initialization Error", "Failed to initialize sales screen.", e.getMessage());
         }
@@ -162,7 +168,7 @@ public class SalesController {
             // Ignore if discount is not a valid number
         }
 
-        totalLabel.setText(String.format("Total: %.2f", total.max(BigDecimal.ZERO)));
+        totalLabel.setText(resources.getString("sales.totalLabel") + " " + String.format("%.2f", total.max(BigDecimal.ZERO)));
     }
 
     @FXML

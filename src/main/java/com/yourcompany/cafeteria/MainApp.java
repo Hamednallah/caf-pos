@@ -9,6 +9,8 @@ import javafx.stage.Stage;
 import org.flywaydb.core.Flyway;
 
 import java.net.URL;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class MainApp extends Application {
 
@@ -25,10 +27,20 @@ public class MainApp extends Application {
             return;
         }
 
-        Parent root = FXMLLoader.load(mainViewUrl);
+        // Set the locale for i18n. This would typically be loaded from user settings.
+        Locale locale = new Locale("ar");
+        ResourceBundle bundle = ResourceBundle.getBundle("messages", locale);
+
+        FXMLLoader loader = new FXMLLoader(mainViewUrl, bundle);
+        Parent root = loader.load();
+
 
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("/application.css").toExternalForm());
+
+        if (locale.getLanguage().equals("ar")) {
+            scene.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT);
+        }
 
         primaryStage.setTitle("Cafeteria POS");
         primaryStage.setScene(scene);

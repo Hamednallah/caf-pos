@@ -12,8 +12,8 @@
     <top>
         <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10;">
             <children>
-                <Label text="Manage Items" styleClass="h1" />
-                <Button onAction="#handleAddItem" text="Add New Item" />
+                <Label text="%items.manage" styleClass="h1" />
+                <Button onAction="#handleAddItem" text="%items.addNew" />
             </children>
         </HBox>
     </top>

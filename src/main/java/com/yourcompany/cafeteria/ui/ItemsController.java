@@ -7,6 +7,7 @@ import com.yourcompany.cafeteria.util.DataSourceProvider;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -18,19 +19,23 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class ItemsController {
+public class ItemsController implements Initializable {
 
     @FXML
     private TilePane itemGridPane;
 
     private ItemsService itemsService;
     private List<Category> categories;
+    private ResourceBundle resources;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
         try {
             itemsService = new ItemsService(DataSourceProvider.getConnection());
             categories = itemsService.getAllCategories();
@@ -64,10 +69,10 @@ public class ItemsController {
         nameLabel.setStyle("-fx-font-weight: bold;");
         Label priceLabel = new Label(String.format("Price: %.2f", item.getPrice()));
 
-        Button editButton = new Button("Edit");
+        Button editButton = new Button(resources.getString("items.edit"));
         editButton.setOnAction(event -> handleEditItem(item));
 
-        Button deleteButton = new Button("Delete");
+        Button deleteButton = new Button(resources.getString("items.delete"));
         deleteButton.setStyle("-fx-background-color: #EF4444;"); // Red color for delete
         deleteButton.setOnAction(event -> handleDeleteItem(item));
 
@@ -107,12 +112,12 @@ public class ItemsController {
 
     private void showItemDialog(Item item) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ItemDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ItemDialog.fxml"), resources);
             DialogPane dialogPane = loader.load();
 
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setDialogPane(dialogPane);
-            dialog.setTitle(item == null ? "Add Item" : "Edit Item");
+            dialog.setTitle(item == null ? resources.getString("items.dialog.addTitle") : resources.getString("items.dialog.editTitle"));
 
             TextField nameField = (TextField) dialogPane.lookup("#nameField");
             TextArea descriptionArea = (TextArea) dialogPane.lookup("#descriptionArea");

@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,11 +57,9 @@ class ExpenseServiceTest {
         int expenseId = expenseService.recordExpense(expense);
         assertTrue(expenseId > 0);
 
-        try (ResultSet rs = expenseService.getExpensesByShift(shiftId)) {
-            assertTrue(rs.next());
-            assertEquals(expenseId, rs.getInt("id"));
-            assertFalse(rs.next());
-        }
+        List<Expense> expenses = expenseService.getExpensesByShift(shiftId);
+        assertEquals(1, expenses.size());
+        assertEquals(expenseId, expenses.get(0).getId());
     }
 
     @Test
@@ -91,16 +89,15 @@ class ExpenseServiceTest {
         
         assertTrue(expenseId > 0);
 
-        try (ResultSet rs = expenseService.getExpensesByShift(shiftId)) {
-            assertTrue(rs.next());
-            assertEquals(expenseId, rs.getInt("id"));
-            assertEquals(0, new BigDecimal("25.75").compareTo(rs.getBigDecimal("amount")));
-            assertEquals("Coffee beans", rs.getString("description"));
-            assertEquals("Inventory", rs.getString("category"));
-            assertEquals(1, rs.getInt("recorded_by"));
-            assertEquals(shiftId, rs.getInt("shift_id"));
-            assertFalse(rs.next());
-        }
+        List<Expense> expenses = expenseService.getExpensesByShift(shiftId);
+        assertEquals(1, expenses.size());
+        Expense retrievedExpense = expenses.get(0);
+        assertEquals(expenseId, retrievedExpense.getId());
+        assertEquals(0, new BigDecimal("25.75").compareTo(retrievedExpense.getAmount()));
+        assertEquals("Coffee beans", retrievedExpense.getDescription());
+        assertEquals("Inventory", retrievedExpense.getCategory());
+        assertEquals(1, retrievedExpense.getRecordedBy());
+        assertEquals(shiftId, retrievedExpense.getShiftId());
     }
 
     @Test

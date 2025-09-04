@@ -6,7 +6,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.ReportsController">
     <top>
-        <Label text="Reports" styleClass="h1">
+        <Label text="%main.reports" styleClass="h1">
             <padding>
                 <Insets left="10" top="10"/>
             </padding>
@@ -15,36 +15,36 @@
     <center>
         <TabPane tabClosingPolicy="UNAVAILABLE">
             <tabs>
-                <Tab text="Daily Sales">
+                <Tab text="%reports.dailySales">
                     <content>
                         <BorderPane>
                             <top>
                                 <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10;">
-                                    <Label text="Select Date:"/>
+                                    <Label text="%reports.selectDate"/>
                                     <DatePicker fx:id="dailyDatePicker"/>
-                                    <Button onAction="#handleGenerateDailyReport" text="Generate"/>
-                                    <Button fx:id="exportDailyCsvButton" onAction="#handleExportDailyCsv" text="Export as CSV"/>
+                                    <Button onAction="#handleGenerateDailyReport" text="%reports.generate"/>
+                                    <Button fx:id="exportDailyCsvButton" onAction="#handleExportDailyCsv" text="%reports.exportCsv"/>
                                 </HBox>
                             </top>
                             <center>
                                 <TableView fx:id="dailyReportTable">
                                     <columns>
-                                        <TableColumn fx:id="dailyItemNameCol" prefWidth="200" text="Item Name"/>
-                                        <TableColumn fx:id="dailyQuantityCol" prefWidth="150" text="Quantity Sold"/>
-                                        <TableColumn fx:id="dailySalesCol" prefWidth="150" text="Total Sales"/>
+                                        <TableColumn fx:id="dailyItemNameCol" prefWidth="200" text="%reports.itemName"/>
+                                        <TableColumn fx:id="dailyQuantityCol" prefWidth="150" text="%reports.quantitySold"/>
+                                        <TableColumn fx:id="dailySalesCol" prefWidth="150" text="%reports.totalSales"/>
                                     </columns>
                                 </TableView>
                             </center>
                         </BorderPane>
                     </content>
                 </Tab>
-                <Tab text="Shift Report">
+                <Tab text="%reports.shiftReport">
                     <content>
                         <VBox spacing="10" style="-fx-padding: 10;">
                             <HBox spacing="10" alignment="CENTER_LEFT">
-                                <Label text="Shift ID:"/>
-                                <TextField fx:id="shiftIdField" promptText="Enter Shift ID"/>
-                                <Button onAction="#handleGenerateShiftReport" text="Generate"/>
+                                <Label text="%reports.shiftId"/>
+                                <TextField fx:id="shiftIdField" promptText="%reports.enterShiftId"/>
+                                <Button onAction="#handleGenerateShiftReport" text="%reports.generate"/>
                             </HBox>
                             <GridPane fx:id="shiftReportGrid" hgap="10" vgap="5" style="-fx-font-size: 14px;">
                                 <padding>
@@ -54,15 +54,15 @@
                         </VBox>
                     </content>
                 </Tab>
-                <Tab text="Date Range Report">
+                <Tab text="%reports.dateRangeReport">
                     <content>
                         <VBox spacing="10" style="-fx-padding: 10;">
                             <HBox spacing="10" alignment="CENTER_LEFT">
-                                <Label text="From:"/>
+                                <Label text="%reports.from"/>
                                 <DatePicker fx:id="fromDateDatePicker"/>
-                                <Label text="To:"/>
+                                <Label text="%reports.to"/>
                                 <DatePicker fx:id="toDateDatePicker"/>
-                                <Button onAction="#handleGenerateDateRangeReport" text="Generate"/>
+                                <Button onAction="#handleGenerateDateRangeReport" text="%reports.generate"/>
                             </HBox>
                             <GridPane fx:id="dateRangeReportGrid" hgap="10" vgap="5" style="-fx-font-size: 14px;">
                                  <padding>

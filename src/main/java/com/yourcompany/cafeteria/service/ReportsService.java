@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
 
 public class ReportsService {
     private final Connection connection;
@@ -76,9 +77,9 @@ public class ReportsService {
 
         // 3. Calculate Expenses
         BigDecimal totalExpenses = BigDecimal.ZERO;
-        ResultSet expensesRs = expensesDAO.listByShift(shiftId);
-        while (expensesRs.next()) {
-            totalExpenses = totalExpenses.add(expensesRs.getBigDecimal("amount"));
+        List<com.yourcompany.cafeteria.model.Expense> expenses = expensesDAO.listByShift(shiftId);
+        for (com.yourcompany.cafeteria.model.Expense expense : expenses) {
+            totalExpenses = totalExpenses.add(expense.getAmount());
         }
         summary.setTotalExpenses(totalExpenses);
 
