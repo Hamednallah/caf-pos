@@ -165,8 +165,13 @@ public class SalesController {
             return; // User cancelled
         }
 
+        if (SessionManager.getCurrentUser() == null) {
+            showError("Error", "No user logged in.", "Cannot finalize order.");
+            return;
+        }
+
         Order order = new Order();
-        order.cashierId = SessionManager.getCurrentCashierId();
+        order.cashierId = SessionManager.getCurrentUser().getId();
         order.shiftId = SessionManager.getCurrentShiftId();
         order.status = "FINALIZED";
         order.paymentMethod = result.get();

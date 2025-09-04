@@ -15,6 +15,7 @@
                 <Button text="Shifts" onAction="#showShiftsView" maxWidth="Infinity"/>
                 <Button text="Expenses" onAction="#showExpensesView" maxWidth="Infinity"/>
                 <Button text="Reports" onAction="#showReportsView" maxWidth="Infinity"/>
+                <Button fx:id="usersButton" text="Users" onAction="#showUsersView" maxWidth="Infinity"/>
                 <Button text="Settings" onAction="#showSettingsView" maxWidth="Infinity"/>
             </children>
         </VBox>

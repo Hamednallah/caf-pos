@@ -1,23 +1,21 @@
 package com.yourcompany.cafeteria.util;
 
+import com.yourcompany.cafeteria.model.User;
+
 /**
  * A simple static class to hold session information like the current user and active shift.
- * This is a temporary solution. In a real application, this would be replaced by a
- * more robust session management mechanism.
  */
 public class SessionManager {
-    // Hardcoded to user 'admin' (ID=1) for now.
-    // This would be set upon successful login.
-    private static Integer currentCashierId = 1;
 
+    private static User currentUser = null;
     private static Integer currentShiftId = null;
 
-    public static Integer getCurrentCashierId() {
-        return currentCashierId;
+    public static User getCurrentUser() {
+        return currentUser;
     }
 
-    public static void setCurrentCashierId(Integer cashierId) {
-        SessionManager.currentCashierId = cashierId;
+    public static void setCurrentUser(User user) {
+        SessionManager.currentUser = user;
     }
 
     public static Integer getCurrentShiftId() {
@@ -30,5 +28,10 @@ public class SessionManager {
 
     public static boolean isShiftActive() {
         return currentShiftId != null;
+    }
+
+    public static void clearSession() {
+        currentUser = null;
+        currentShiftId = null;
     }
 }

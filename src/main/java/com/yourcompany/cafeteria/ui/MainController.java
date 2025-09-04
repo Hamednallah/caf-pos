@@ -1,20 +1,45 @@
 package com.yourcompany.cafeteria.ui;
 
+import com.yourcompany.cafeteria.service.StartupService;
+import com.yourcompany.cafeteria.util.DataSourceProvider;
+import com.yourcompany.cafeteria.util.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 
 public class MainController {
 
     @FXML
     private BorderPane contentPane;
+    @FXML
+    private Button usersButton;
 
     @FXML
     public void initialize() {
+        // Perform startup checks before loading any views
+        try (var c = DataSourceProvider.getConnection()) {
+            StartupService startupService = new StartupService(c);
+            startupService.checkAndResumeActiveShift();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // In a real app, you would show a fatal error dialog and possibly exit.
+        }
+
+        // Apply role-based access control
+        if (SessionManager.getCurrentUser() != null && SessionManager.getCurrentUser().getRoleId() == 1) {
+            usersButton.setVisible(true);
+            usersButton.setManaged(true);
+        } else {
+            usersButton.setVisible(false);
+            usersButton.setManaged(false);
+        }
+
         // Load the default view on startup
         showSalesView();
     }
@@ -42,6 +67,11 @@ public class MainController {
     @FXML
     private void showReportsView() {
         loadView("/fxml/ReportsView.fxml");
+    }
+
+    @FXML
+    private void showUsersView() {
+        loadView("/fxml/UsersView.fxml");
     }
 
     @FXML

@@ -83,7 +83,9 @@ public class ExpensesController {
             newExpense.setDescription(description);
             newExpense.setAmount(amount);
             newExpense.setShiftId(SessionManager.getCurrentShiftId());
-            newExpense.setRecordedBy(SessionManager.getCurrentCashierId());
+            if (SessionManager.getCurrentUser() != null) {
+                newExpense.setRecordedBy(SessionManager.getCurrentUser().getId());
+            }
             newExpense.setRecordedAt(LocalDateTime.now());
 
             try (var c = DataSourceProvider.getConnection()) {

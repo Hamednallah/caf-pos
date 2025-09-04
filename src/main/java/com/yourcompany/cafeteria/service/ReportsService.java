@@ -1,12 +1,9 @@
 package com.yourcompany.cafeteria.service;
 
 import com.yourcompany.cafeteria.dao.ExpensesDAO;
-import com.yourcompany.cafeteria.dao.ExpensesDAO;
 import com.yourcompany.cafeteria.dao.OrdersDAO;
 import com.yourcompany.cafeteria.dao.ReportsDAO;
 import com.yourcompany.cafeteria.dao.ShiftsDAO;
-import com.yourcompany.cafeteria.model.DateRangeReport;
-import com.yourcompany.cafeteria.model.ShiftReport;
 import com.yourcompany.cafeteria.model.ShiftSummary;
 
 import java.math.BigDecimal;
@@ -28,20 +25,6 @@ public class ReportsService {
             throw new IllegalArgumentException("Date cannot be null.");
         }
         return dao.dailySales(date);
-    }
-
-    public ShiftReport getShiftReport(int shiftId) throws Exception {
-        return dao.getShiftReport(shiftId);
-    }
-
-    public DateRangeReport getDateRangeReport(LocalDate from, LocalDate to) throws Exception {
-        if (from == null || to == null) {
-            throw new IllegalArgumentException("Dates cannot be null.");
-        }
-        if (from.isAfter(to)) {
-            throw new IllegalArgumentException("'From' date cannot be after 'To' date.");
-        }
-        return dao.getDateRangeReport(from, to);
     }
 
     public ShiftSummary getShiftSummary(int shiftId) throws Exception {

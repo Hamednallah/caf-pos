@@ -28,7 +28,6 @@
         <version>3.2.5</version>
         <configuration>
           <argLine>-Djava.awt.headless=false -Dprism.order=sw -Dsun.java2d.d3d=false -Dcaf.test.virtualPrinters="Virtual Test Printer"</argLine>
-          <reuseForks>false</reuseForks>
           <properties>
             <configurationParameters>junit.jupiter.extensions.autodetection.enabled=true</configurationParameters>
           </properties>
