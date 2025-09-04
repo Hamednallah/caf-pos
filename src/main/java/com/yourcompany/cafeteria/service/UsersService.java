@@ -2,9 +2,11 @@ package com.yourcompany.cafeteria.service;
 
 import com.yourcompany.cafeteria.dao.UsersDAO;
 import com.yourcompany.cafeteria.model.User;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 public class UsersService {
     private final UsersDAO usersDAO;
@@ -17,10 +19,41 @@ public class UsersService {
         return usersDAO.findByUsername(username);
     }
 
-    public int createUser(User user) throws SQLException {
-        if (user.getPasswordHash() == null) {
-            throw new IllegalArgumentException("Password hash must be set before creating user.");
+    public int createUser(User user, String plainTextPassword) throws SQLException {
+        if (plainTextPassword == null || plainTextPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty.");
         }
+        String hashedPassword = BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
+        user.setPasswordHash(hashedPassword);
         return usersDAO.createUser(user.getUsername(), user.getPasswordHash(), user.getFullName(), user.getRoleId());
+    }
+
+    public User authenticate(String username, String plainTextPassword) throws SQLException {
+        User user = findByUsername(username);
+        if (user != null && BCrypt.checkpw(plainTextPassword, user.getPasswordHash())) {
+            return user;
+        }
+        return null;
+    }
+
+    public List<User> listAll() throws SQLException {
+        return usersDAO.listAll();
+    }
+
+    public void updateUser(User user, String plainTextPassword) throws SQLException {
+        if (plainTextPassword != null && !plainTextPassword.trim().isEmpty()) {
+            String hashedPassword = BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
+            user.setPasswordHash(hashedPassword);
+        } else {
+            user.setPasswordHash(null);
+        }
+        usersDAO.updateUser(user);
+    }
+
+    public void toggleUserStatus(int userId) throws SQLException {
+        User user = usersDAO.findById(userId);
+        if (user != null) {
+            usersDAO.updateUserStatus(userId, !user.isActive());
+        }
     }
 }

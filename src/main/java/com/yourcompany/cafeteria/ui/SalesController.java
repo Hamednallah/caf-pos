@@ -1,70 +1,64 @@
 package com.yourcompany.cafeteria.ui;
 
+import com.yourcompany.cafeteria.model.Category;
 import com.yourcompany.cafeteria.model.Item;
 import com.yourcompany.cafeteria.model.Order;
 import com.yourcompany.cafeteria.model.OrderItem;
 import com.yourcompany.cafeteria.service.ItemsService;
 import com.yourcompany.cafeteria.service.OrdersService;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
-import com.yourcompany.cafeteria.util.ReceiptPrinter;
 import com.yourcompany.cafeteria.util.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.TilePane;
+import javafx.scene.layout.VBox;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 public class SalesController {
 
     @FXML private TextField searchField;
-    @FXML private ListView<Item> itemCatalogView;
+    @FXML private ListView<Category> categoryListView;
+    @FXML private TilePane itemGridPane;
     @FXML private TableView<OrderItem> cartTable;
     @FXML private TableColumn<OrderItem, String> cartItemNameCol;
     @FXML private TableColumn<OrderItem, Integer> cartQuantityCol;
     @FXML private TableColumn<OrderItem, BigDecimal> cartPriceCol;
     @FXML private TextField discountField;
     @FXML private Label totalLabel;
+    @FXML private ToggleGroup paymentMethodToggleGroup;
+    @FXML private RadioButton cashRadioButton;
+    @FXML private RadioButton bankRadioButton;
     @FXML private Button finalizeButton;
 
-    private ObservableList<Item> itemCatalogMasterList = FXCollections.observableArrayList();
-    private FilteredList<Item> filteredItemCatalog;
+    private ItemsService itemsService;
+    private OrdersService ordersService;
+    private ObservableList<Item> allItems = FXCollections.observableArrayList();
+    private ObservableList<Category> allCategories = FXCollections.observableArrayList();
     private ObservableList<OrderItem> cart = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        setupCatalog();
-        setupCartTable();
-        setupSearchFilter();
-        setupEventListeners();
-
-        // Disable finalize button if no shift is active
-        finalizeButton.setDisable(!SessionManager.isShiftActive());
-
-        loadCatalog();
-    }
-
-    private void setupCatalog() {
-        filteredItemCatalog = new FilteredList<>(itemCatalogMasterList, p -> true);
-        itemCatalogView.setItems(filteredItemCatalog);
-        itemCatalogView.setCellFactory(listView -> new ListCell<Item>() {
-            @Override
-            protected void updateItem(Item item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(item.getName() + " (" + item.getPrice() + ")");
-                }
-            }
-        });
+        try {
+            itemsService = new ItemsService(DataSourceProvider.getConnection());
+            ordersService = new OrdersService(DataSourceProvider.getConnection());
+            setupCartTable();
+            loadCategories();
+            loadItems();
+            setupEventListeners();
+            finalizeButton.setDisable(!SessionManager.isShiftActive());
+        } catch (Exception e) {
+            showError("Initialization Error", "Failed to initialize sales screen.", e.getMessage());
+        }
     }
 
     private void setupCartTable() {
@@ -74,43 +68,67 @@ public class SalesController {
         cartPriceCol.setCellValueFactory(new PropertyValueFactory<>("lineTotal"));
     }
 
-    private void setupSearchFilter() {
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            filteredItemCatalog.setPredicate(item -> {
-                if (newValue == null || newValue.isEmpty()) {
-                    return true;
-                }
-                String lowerCaseFilter = newValue.toLowerCase();
-                if (item.getName() == null) return false;
-                return item.getName().toLowerCase().contains(lowerCaseFilter);
-            });
-        });
+    private void loadCategories() throws Exception {
+        allCategories.setAll(itemsService.getAllCategories());
+        categoryListView.setItems(allCategories);
     }
 
-    private void setupEventListeners() {
-        itemCatalogView.setOnMouseClicked(event -> {
+    private void loadItems() throws Exception {
+        allItems.setAll(itemsService.listAll());
+        displayItems(allItems);
+    }
+
+    private void displayItems(List<Item> itemsToDisplay) {
+        itemGridPane.getChildren().clear();
+        for (Item item : itemsToDisplay) {
+            itemGridPane.getChildren().add(createItemCard(item));
+        }
+    }
+
+    private Node createItemCard(Item item) {
+        VBox card = new VBox(5);
+        card.setAlignment(Pos.CENTER);
+        card.setStyle("-fx-background-color: -fx-surface; -fx-padding: 10; -fx-border-color: -fx-subtle-border; -fx-border-width: 1; -fx-background-radius: 8; -fx-border-radius: 8;");
+        card.setPrefSize(120, 100);
+
+        Label nameLabel = new Label(item.getName());
+        nameLabel.setStyle("-fx-font-weight: bold;");
+        Label priceLabel = new Label(String.format("%.2f", item.getPrice()));
+
+        card.getChildren().addAll(nameLabel, priceLabel);
+
+        card.setOnMouseClicked(event -> {
             if (!SessionManager.isShiftActive()) {
                 showAlert(Alert.AlertType.WARNING, "No Active Shift", "You must start a shift before making a sale.");
                 return;
             }
-            Item selectedItem = itemCatalogView.getSelectionModel().getSelectedItem();
-            if (selectedItem != null) {
-                addToCart(selectedItem);
-                itemCatalogView.getSelectionModel().clearSelection();
-            }
+            addToCart(item);
         });
 
-        cart.addListener((javafx.collections.ListChangeListener.Change<? extends OrderItem> c) -> updateTotals());
-        discountField.textProperty().addListener((obs) -> updateTotals());
+        return card;
     }
 
-    private void loadCatalog() {
-        try (var c = DataSourceProvider.getConnection()) {
-            ItemsService itemsService = new ItemsService(c);
-            itemCatalogMasterList.setAll(itemsService.listAll());
-        } catch (Exception e) {
-            showError("Database Error", "Failed to load item catalog.", e.getMessage());
-        }
+    private void setupEventListeners() {
+        cart.addListener((javafx.collections.ListChangeListener.Change<? extends OrderItem> c) -> updateTotals());
+        discountField.textProperty().addListener((obs) -> updateTotals());
+
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> filterItems());
+        categoryListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> filterItems());
+    }
+
+    private void filterItems() {
+        Category selectedCategory = categoryListView.getSelectionModel().getSelectedItem();
+        String searchText = searchField.getText().toLowerCase().trim();
+
+        List<Item> filteredItems = allItems.stream()
+                .filter(item -> {
+                    boolean categoryMatch = selectedCategory == null || item.getCategoryId() == selectedCategory.getId();
+                    boolean searchMatch = searchText.isEmpty() || item.getName().toLowerCase().contains(searchText);
+                    return categoryMatch && searchMatch;
+                })
+                .toList();
+
+        displayItems(filteredItems);
     }
 
     private void addToCart(Item item) {
@@ -144,7 +162,7 @@ public class SalesController {
             // Ignore if discount is not a valid number
         }
 
-        totalLabel.setText(String.format("%.2f", total.max(BigDecimal.ZERO)));
+        totalLabel.setText(String.format("Total: %.2f", total.max(BigDecimal.ZERO)));
     }
 
     @FXML
@@ -154,22 +172,22 @@ public class SalesController {
             return;
         }
 
-        List<String> paymentChoices = Arrays.asList("CASH", "BANK");
-        ChoiceDialog<String> dialog = new ChoiceDialog<>("CASH", paymentChoices);
-        dialog.setTitle("Payment Confirmation");
-        dialog.setHeaderText("Finalize Sale");
-        dialog.setContentText("Choose payment method:");
-        Optional<String> result = dialog.showAndWait();
+        RadioButton selectedPaymentMethod = (RadioButton) paymentMethodToggleGroup.getSelectedToggle();
+        if (selectedPaymentMethod == null) {
+            showAlert(Alert.AlertType.WARNING, "Payment Method", "Please select a payment method.");
+            return;
+        }
 
-        if (result.isEmpty()) {
-            return; // User cancelled
+        if (SessionManager.getCurrentUser() == null) {
+            showError("Error", "No user logged in.", "Cannot finalize order.");
+            return;
         }
 
         Order order = new Order();
-        order.cashierId = SessionManager.getCurrentCashierId();
+        order.cashierId = SessionManager.getCurrentUser().getId();
         order.shiftId = SessionManager.getCurrentShiftId();
         order.status = "FINALIZED";
-        order.paymentMethod = result.get();
+        order.paymentMethod = selectedPaymentMethod.getText().toUpperCase();
         order.paymentConfirmed = true;
         order.items = new ArrayList<>(cart);
         order.createdAt = LocalDateTime.now();
@@ -184,17 +202,10 @@ public class SalesController {
              order.discountAmount = BigDecimal.ZERO;
         }
 
-        try (var c = DataSourceProvider.getConnection()) {
-            OrdersService ordersService = new OrdersService(c);
+        try {
             int id = ordersService.create(order);
-            order.id = id;
-
             showAlert(Alert.AlertType.INFORMATION, "Success", "Order #" + id + " created successfully.");
-
-            ReceiptPrinter.print(order);
-
             clearSale();
-
         } catch (Exception e) {
             showError("Failed to Save Order", "There was an error saving the order to the database.", e.getMessage());
         }

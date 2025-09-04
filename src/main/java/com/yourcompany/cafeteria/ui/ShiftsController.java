@@ -1,6 +1,6 @@
 package com.yourcompany.cafeteria.ui;
 
-import com.yourcompany.cafeteria.model.ShiftSummary;
+import com.yourcompany.cafeteria.model.ShiftReport;
 import com.yourcompany.cafeteria.service.ReportsService;
 import com.yourcompany.cafeteria.service.ShiftService;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
@@ -11,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 
 import java.math.BigDecimal;
-import java.sql.ResultSet;
 import java.util.Optional;
 
 public class ShiftsController {
@@ -22,27 +21,7 @@ public class ShiftsController {
 
     @FXML
     public void initialize() {
-        checkForActiveShift();
         updateUIState();
-    }
-
-    private void checkForActiveShift() {
-        if (SessionManager.isShiftActive()) {
-            return;
-        }
-
-        try (var c = DataSourceProvider.getConnection()) {
-            ShiftService shiftService = new ShiftService(c);
-            Integer cashierId = SessionManager.getCurrentCashierId();
-            if (cashierId != null) {
-                ResultSet rs = shiftService.getActiveShiftForCashier(cashierId);
-                if (rs.next()) {
-                    SessionManager.setCurrentShiftId(rs.getInt("id"));
-                }
-            }
-        } catch (Exception e) {
-            showError("Database Error", "Failed to check for active shift.", e.getMessage());
-        }
     }
 
     private void updateUIState() {
@@ -66,9 +45,13 @@ public class ShiftsController {
                     showError("Invalid Input", "Starting float cannot be negative.", "");
                     return;
                 }
+                if (SessionManager.getCurrentUser() == null) {
+                    showError("Error", "No user logged in.", "Cannot start a new shift.");
+                    return;
+                }
                 try (var c = DataSourceProvider.getConnection()) {
                     ShiftService shiftService = new ShiftService(c);
-                    int newShiftId = shiftService.startShift(SessionManager.getCurrentCashierId(), startingFloat);
+                    int newShiftId = shiftService.startShift(SessionManager.getCurrentUser().getId(), startingFloat);
                     SessionManager.setCurrentShiftId(newShiftId);
                     showAlert(Alert.AlertType.INFORMATION, "Success", "Shift #" + newShiftId + " started successfully.");
                     updateUIState();
@@ -90,14 +73,11 @@ public class ShiftsController {
 
         confirmation.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
             try (var c = DataSourceProvider.getConnection()) {
-                // 1. Generate Summary
                 ReportsService reportsService = new ReportsService(c);
-                ShiftSummary summary = reportsService.getShiftSummary(SessionManager.getCurrentShiftId());
+                ShiftReport summary = reportsService.getShiftReport(SessionManager.getCurrentShiftId());
 
-                // 2. Display Summary
                 showShiftSummaryDialog(summary);
 
-                // 3. End the shift in the database
                 ShiftService shiftService = new ShiftService(c);
                 shiftService.endShift(SessionManager.getCurrentShiftId());
 
@@ -111,10 +91,10 @@ public class ShiftsController {
         });
     }
 
-    private void showShiftSummaryDialog(ShiftSummary summary) {
+    private void showShiftSummaryDialog(ShiftReport summary) {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
         dialog.setTitle("Shift Summary Report");
-        dialog.setHeaderText("Summary for Shift #" + summary.getShiftId());
+        dialog.setHeaderText("Summary for Shift #" + SessionManager.getCurrentShiftId());
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -124,15 +104,11 @@ public class ShiftsController {
         grid.add(new Label("Starting Float:"), 0, 0);
         grid.add(new Label(String.format("%.2f", summary.getStartingFloat())), 1, 0);
         grid.add(new Label("Total Cash Sales:"), 0, 1);
-        grid.add(new Label(String.format("%.2f", summary.getTotalCashSales())), 1, 1);
+        grid.add(new Label(String.format("%.2f", summary.getCashTotal())), 1, 1);
         grid.add(new Label("Total Bank Sales:"), 0, 2);
-        grid.add(new Label(String.format("%.2f", summary.getTotalBankSales())), 1, 2);
+        grid.add(new Label(String.format("%.2f", summary.getBankTotal())), 1, 2);
         grid.add(new Label("Total Expenses:"), 0, 3);
         grid.add(new Label(String.format("- %.2f", summary.getTotalExpenses())), 1, 3);
-        grid.add(new Label("Expected Cash in Drawer:"), 0, 4);
-        Label expectedCashLabel = new Label(String.format("%.2f", summary.getExpectedCashInDrawer()));
-        expectedCashLabel.setStyle("-fx-font-weight: bold;");
-        grid.add(expectedCashLabel, 1, 4);
 
         dialog.getDialogPane().setContent(grid);
         dialog.showAndWait();
