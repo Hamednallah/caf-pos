@@ -79,4 +79,8 @@ public class ReportsService {
 
         return summary;
     }
+
+    public com.yourcompany.cafeteria.model.DateRangeReport getDateRangeReport(java.time.LocalDate from, java.time.LocalDate to) throws Exception {
+        return dao.getDateRangeReport(from, to);
+    }
 }
