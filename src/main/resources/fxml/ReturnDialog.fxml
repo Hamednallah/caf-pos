@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<DialogPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            prefWidth="600">
+    <content>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <Label text="%sales.returns.dialog.selectItems" styleClass="h2"/>
+            <TableView fx:id="returnItemsTable" prefHeight="300">
+                <columns>
+                    <TableColumn fx:id="itemNameCol" prefWidth="250" text="%sales.returns.dialog.item"/>
+                    <TableColumn fx:id="quantitySoldCol" prefWidth="100" text="%sales.returns.dialog.qtySold"/>
+                    <TableColumn fx:id="quantityToReturnCol" prefWidth="150" text="%sales.returns.dialog.qtyToReturn"/>
+                </columns>
+            </TableView>
+            <Label fx:id="refundTotalLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="%sales.returns.dialog.totalRefund"/>
+        </VBox>
+    </content>
+    <buttonTypes>
+        <ButtonType fx:id="processReturnButton" text="%sales.returns.dialog.processButton" buttonData="OK_DONE"/>
+        <ButtonType text="%items.dialog.cancel" buttonData="CANCEL_CLOSE"/>
+    </buttonTypes>
+</DialogPane>

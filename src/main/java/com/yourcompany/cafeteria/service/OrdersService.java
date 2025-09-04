@@ -3,6 +3,7 @@ import com.yourcompany.cafeteria.dao.OrdersDAO;
 import com.yourcompany.cafeteria.model.Order;
 import java.sql.Connection;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class OrdersService {
     private final OrdersDAO dao;
@@ -22,5 +23,26 @@ public class OrdersService {
             throw new IllegalArgumentException("Order total amount must be positive.");
         }
         return dao.createOrderTransactional(o);
+    }
+
+    public Order findOrderByIdAndDate(int orderId, LocalDate date) throws Exception {
+        return dao.findOrderByIdAndDate(orderId, date);
+    }
+
+    public void updateOrder(Order order) throws Exception {
+        if (order == null || order.id == null) {
+            throw new IllegalArgumentException("Order and order ID cannot be null.");
+        }
+        if (order.items == null || order.items.isEmpty()) {
+            throw new IllegalArgumentException("Order must have at least one item.");
+        }
+        if (order.totalAmount == null || order.totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Order total amount must be positive.");
+        }
+        dao.updateOrderTransactional(order);
+    }
+
+    public java.util.List<Order> getRecentOrders(int limit) throws Exception {
+        return dao.getRecentOrders(limit);
     }
 }

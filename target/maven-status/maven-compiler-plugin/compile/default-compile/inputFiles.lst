@@ -5,6 +5,7 @@
 /app/src/main/java/com/yourcompany/cafeteria/dao/OrderItemsDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/OrdersDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/ReportsDAO.java
+/app/src/main/java/com/yourcompany/cafeteria/dao/ReturnsDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/SettingsDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/ShiftsDAO.java
 /app/src/main/java/com/yourcompany/cafeteria/dao/UsersDAO.java
@@ -14,6 +15,8 @@
 /app/src/main/java/com/yourcompany/cafeteria/model/Item.java
 /app/src/main/java/com/yourcompany/cafeteria/model/Order.java
 /app/src/main/java/com/yourcompany/cafeteria/model/OrderItem.java
+/app/src/main/java/com/yourcompany/cafeteria/model/Return.java
+/app/src/main/java/com/yourcompany/cafeteria/model/ReturnItem.java
 /app/src/main/java/com/yourcompany/cafeteria/model/Shift.java
 /app/src/main/java/com/yourcompany/cafeteria/model/ShiftReport.java
 /app/src/main/java/com/yourcompany/cafeteria/model/ShiftSummary.java
@@ -23,6 +26,7 @@
 /app/src/main/java/com/yourcompany/cafeteria/service/OrdersService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/PrinterService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/ReportsService.java
+/app/src/main/java/com/yourcompany/cafeteria/service/ReturnsService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/SettingsService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/ShiftService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/StartupService.java

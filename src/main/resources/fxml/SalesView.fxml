@@ -12,6 +12,13 @@
                 <Label text="%sales.categories" styleClass="h2" />
                 <ListView fx:id="categoryListView" prefHeight="200.0" />
                 <TextField fx:id="searchField" promptText="%sales.search" />
+                <Label text="%sales.recentOrders" styleClass="h2" />
+                <TableView fx:id="recentOrdersTable" prefHeight="200.0">
+                    <columns>
+                        <TableColumn fx:id="orderIdCol" prefWidth="75.0" text="%sales.orderId" />
+                        <TableColumn fx:id="orderTotalCol" prefWidth="100.0" text="%sales.total" />
+                    </columns>
+                </TableView>
             </children>
         </VBox>
     </left>
@@ -25,6 +32,10 @@
     <right>
         <VBox prefWidth="300.0" spacing="10" style="-fx-background-color: -fx-surface; -fx-padding: 10;">
             <children>
+                <HBox spacing="5.0">
+                    <TextField fx:id="orderIdSearchField" promptText="%sales.orderSearch.prompt" HBox.hgrow="ALWAYS" />
+                    <Button fx:id="orderSearchButton" onAction="#handleOrderSearch" text="%sales.orderSearch.button" />
+                </HBox>
                 <Label text="%sales.cart" styleClass="h1" />
                 <TableView fx:id="cartTable" prefHeight="400.0">
                     <columns>
@@ -51,7 +62,11 @@
                         </ToggleGroup>
                     </children>
                 </VBox>
-                <Button fx:id="finalizeButton" onAction="#handleFinalize" text="%sales.confirmPayment" maxWidth="Infinity" style="-fx-font-size: 16px;" />
+                <HBox spacing="5">
+                    <Button fx:id="saveButton" onAction="#handleSave" text="%sales.save" maxWidth="Infinity" HBox.hgrow="ALWAYS" />
+                    <Button fx:id="saveAndPrintButton" onAction="#handleSaveAndPrint" text="%sales.saveAndPrint" maxWidth="Infinity" HBox.hgrow="ALWAYS" />
+                    <Button fx:id="cancelButton" onAction="#handleCancel" text="%sales.cancel" maxWidth="Infinity" HBox.hgrow="ALWAYS" style="-fx-background-color: #EF4444;" />
+                </HBox>
             </children>
         </VBox>
     </right>

@@ -1,31 +1,37 @@
 package com.yourcompany.cafeteria.ui;
 
-import com.yourcompany.cafeteria.model.Category;
-import com.yourcompany.cafeteria.model.Item;
-import com.yourcompany.cafeteria.model.Order;
-import com.yourcompany.cafeteria.model.OrderItem;
+import com.yourcompany.cafeteria.model.*;
 import com.yourcompany.cafeteria.service.ItemsService;
 import com.yourcompany.cafeteria.service.OrdersService;
+import com.yourcompany.cafeteria.service.ReturnsService;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
 import com.yourcompany.cafeteria.util.SessionManager;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class SalesController implements Initializable {
 
@@ -41,14 +47,24 @@ public class SalesController implements Initializable {
     @FXML private ToggleGroup paymentMethodToggleGroup;
     @FXML private RadioButton cashRadioButton;
     @FXML private RadioButton bankRadioButton;
-    @FXML private Button finalizeButton;
+    @FXML private Button saveButton;
+    @FXML private Button saveAndPrintButton;
+    @FXML private Button cancelButton;
+    @FXML private TableView<Order> recentOrdersTable;
+    @FXML private TableColumn<Order, Integer> orderIdCol;
+    @FXML private TableColumn<Order, BigDecimal> orderTotalCol;
+    @FXML private TextField orderIdSearchField;
+    @FXML private Button orderSearchButton;
 
     private ItemsService itemsService;
     private OrdersService ordersService;
+    private ReturnsService returnsService;
     private ObservableList<Item> allItems = FXCollections.observableArrayList();
     private ObservableList<Category> allCategories = FXCollections.observableArrayList();
     private ObservableList<OrderItem> cart = FXCollections.observableArrayList();
+    private ObservableList<Order> recentOrders = FXCollections.observableArrayList();
     private ResourceBundle resources;
+    private Integer orderIdToEdit = null;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -56,15 +72,25 @@ public class SalesController implements Initializable {
         try {
             itemsService = new ItemsService(DataSourceProvider.getConnection());
             ordersService = new OrdersService(DataSourceProvider.getConnection());
+            returnsService = new ReturnsService(DataSourceProvider.getConnection());
             setupCartTable();
+            setupRecentOrdersTable();
             loadCategories();
             loadItems();
+            loadRecentOrders();
             setupEventListeners();
-            finalizeButton.setDisable(!SessionManager.isShiftActive());
+            updateButtonStates();
             updateTotals();
         } catch (Exception e) {
             showError("Initialization Error", "Failed to initialize sales screen.", e.getMessage());
         }
+    }
+
+    private void updateButtonStates() {
+        boolean shiftActive = SessionManager.isShiftActive();
+        saveButton.setDisable(!shiftActive);
+        saveAndPrintButton.setDisable(!shiftActive);
+        cancelButton.setDisable(!shiftActive);
     }
 
     private void setupCartTable() {
@@ -72,6 +98,12 @@ public class SalesController implements Initializable {
         cartItemNameCol.setCellValueFactory(new PropertyValueFactory<>("itemName"));
         cartQuantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         cartPriceCol.setCellValueFactory(new PropertyValueFactory<>("lineTotal"));
+    }
+
+    private void setupRecentOrdersTable() {
+        recentOrdersTable.setItems(recentOrders);
+        orderIdCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        orderTotalCol.setCellValueFactory(new PropertyValueFactory<>("totalAmount"));
     }
 
     private void loadCategories() throws Exception {
@@ -82,6 +114,10 @@ public class SalesController implements Initializable {
     private void loadItems() throws Exception {
         allItems.setAll(itemsService.listAll());
         displayItems(allItems);
+    }
+
+    private void loadRecentOrders() throws Exception {
+        recentOrders.setAll(ordersService.getRecentOrders(20));
     }
 
     private void displayItems(List<Item> itemsToDisplay) {
@@ -105,7 +141,7 @@ public class SalesController implements Initializable {
 
         card.setOnMouseClicked(event -> {
             if (!SessionManager.isShiftActive()) {
-                showAlert(Alert.AlertType.WARNING, "No Active Shift", "You must start a shift before making a sale.");
+                showAlert(Alert.AlertType.WARNING, resources.getString("sales.alert.noActiveShift.title"), resources.getString("sales.alert.noActiveShift.message"));
                 return;
             }
             addToCart(item);
@@ -120,6 +156,11 @@ public class SalesController implements Initializable {
 
         searchField.textProperty().addListener((obs, oldVal, newVal) -> filterItems());
         categoryListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> filterItems());
+        recentOrdersTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                showOrderDetailsDialog(newVal);
+            }
+        });
     }
 
     private void filterItems() {
@@ -172,20 +213,34 @@ public class SalesController implements Initializable {
     }
 
     @FXML
-    public void handleFinalize() {
+    private void handleSave() {
+        saveOrder(false);
+    }
+
+    @FXML
+    private void handleSaveAndPrint() {
+        saveOrder(true);
+    }
+
+    @FXML
+    private void handleCancel() {
+        clearSale();
+    }
+
+    private void saveOrder(boolean printReceipt) {
         if (cart.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Empty Cart", "Cannot finalize an empty order.");
+            showAlert(Alert.AlertType.WARNING, resources.getString("sales.alert.emptyCart.title"), resources.getString("sales.alert.emptyCart.message"));
             return;
         }
 
         RadioButton selectedPaymentMethod = (RadioButton) paymentMethodToggleGroup.getSelectedToggle();
         if (selectedPaymentMethod == null) {
-            showAlert(Alert.AlertType.WARNING, "Payment Method", "Please select a payment method.");
+            showAlert(Alert.AlertType.WARNING, resources.getString("sales.alert.noPaymentMethod.title"), resources.getString("sales.alert.noPaymentMethod.message"));
             return;
         }
 
         if (SessionManager.getCurrentUser() == null) {
-            showError("Error", "No user logged in.", "Cannot finalize order.");
+            showError(resources.getString("sales.error.noUser.title"), resources.getString("sales.error.noUser.header"), resources.getString("sales.error.noUser.content"));
             return;
         }
 
@@ -209,11 +264,24 @@ public class SalesController implements Initializable {
         }
 
         try {
-            int id = ordersService.create(order);
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Order #" + id + " created successfully.");
+            if (orderIdToEdit == null) {
+                int id = ordersService.create(order);
+                order.id = id;
+                showAlert(Alert.AlertType.INFORMATION, resources.getString("sales.success.title"), MessageFormat.format(resources.getString("sales.success.message"), id));
+            } else {
+                order.id = orderIdToEdit;
+                ordersService.updateOrder(order);
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Order #" + order.id + " updated successfully.");
+            }
+
+            if (printReceipt) {
+                com.yourcompany.cafeteria.util.ReceiptPrinter.print(order);
+            }
+
             clearSale();
+            loadRecentOrders();
         } catch (Exception e) {
-            showError("Failed to Save Order", "There was an error saving the order to the database.", e.getMessage());
+            showError(resources.getString("sales.error.saveFailed.title"), resources.getString("sales.error.saveFailed.header"), e.getMessage());
         }
     }
 
@@ -221,7 +289,135 @@ public class SalesController implements Initializable {
         cart.clear();
         discountField.clear();
         searchField.clear();
+        orderIdToEdit = null;
         updateTotals();
+    }
+
+    @FXML
+    private void handleOrderSearch() {
+        String orderIdText = orderIdSearchField.getText();
+        if (orderIdText.isEmpty()) {
+            return;
+        }
+        try {
+            int orderId = Integer.parseInt(orderIdText);
+            Order order = ordersService.findOrderByIdAndDate(orderId, LocalDate.now());
+            if (order != null) {
+                showOrderDetailsDialog(order);
+            } else {
+                showAlert(Alert.AlertType.WARNING, resources.getString("sales.orderSearch.notFound.title"), MessageFormat.format(resources.getString("sales.orderSearch.notFound.message"), orderId));
+            }
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.ERROR, resources.getString("sales.orderSearch.error.title"), "Order ID must be a number.");
+        } catch (Exception e) {
+            showError(resources.getString("sales.orderSearch.error.title"), resources.getString("sales.orderSearch.error.message"), e.getMessage());
+        }
+    }
+
+    private void showOrderDetailsDialog(Order order) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(resources.getString("sales.orderDetails.title"));
+
+        ButtonType returnButtonType = new ButtonType(resources.getString("sales.orderDetails.returnButton"));
+        ButtonType editButtonType = new ButtonType(resources.getString("sales.orderDetails.editButton"));
+        dialog.getDialogPane().getButtonTypes().addAll(returnButtonType, editButtonType, ButtonType.CANCEL);
+
+        VBox vbox = new VBox();
+        vbox.getChildren().add(new Label("Order ID: " + order.id));
+        vbox.getChildren().add(new Label("Total: " + order.totalAmount));
+        vbox.getChildren().add(new Label("Date: " + order.createdAt));
+        dialog.getDialogPane().setContent(vbox);
+
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == returnButtonType) {
+                showReturnDialog(order);
+            } else if (response == editButtonType) {
+                editOrder(order);
+            }
+        });
+    }
+
+    private void editOrder(Order order) {
+        clearSale();
+        cart.addAll(order.items);
+        discountField.setText(order.discountAmount.toPlainString());
+        this.orderIdToEdit = order.id;
+    }
+
+    private void showReturnDialog(Order order) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ReturnDialog.fxml"), resources);
+            DialogPane dialogPane = loader.load();
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane(dialogPane);
+            dialog.setTitle(resources.getString("sales.returns.dialog.title"));
+
+            TableView<OrderItem> returnItemsTable = (TableView<OrderItem>) dialogPane.lookup("#returnItemsTable");
+            TableColumn<OrderItem, String> itemNameCol = (TableColumn<OrderItem, String>) returnItemsTable.getColumns().get(0);
+            TableColumn<OrderItem, Integer> quantitySoldCol = (TableColumn<OrderItem, Integer>) returnItemsTable.getColumns().get(1);
+            TableColumn<OrderItem, TextField> quantityToReturnCol = (TableColumn<OrderItem, TextField>) returnItemsTable.getColumns().get(2);
+            Label refundTotalLabel = (Label) dialogPane.lookup("#refundTotalLabel");
+
+            itemNameCol.setCellValueFactory(new PropertyValueFactory<>("itemName"));
+            quantitySoldCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+
+            ObservableList<OrderItem> itemsToReturn = FXCollections.observableArrayList(order.items);
+            returnItemsTable.setItems(itemsToReturn);
+
+            quantityToReturnCol.setCellValueFactory(cellData -> {
+                TextField textField = new TextField("0");
+                textField.textProperty().addListener((obs, oldVal, newVal) -> {
+                    // Update total refund amount
+                    BigDecimal totalRefund = BigDecimal.ZERO;
+                    for (OrderItem item : returnItemsTable.getItems()) {
+                        TextField tf = (TextField) quantityToReturnCol.getCellObservableValue(item).getValue();
+                        int qtyToReturn = 0;
+                        try {
+                            qtyToReturn = Integer.parseInt(tf.getText());
+                        } catch (NumberFormatException e) {
+                            // ignore
+                        }
+                        totalRefund = totalRefund.add(item.getPriceAtPurchase().multiply(new BigDecimal(qtyToReturn)));
+                    }
+                    refundTotalLabel.setText(resources.getString("sales.returns.dialog.totalRefund") + " " + String.format("%.2f", totalRefund));
+                });
+                return new SimpleObjectProperty<>(textField);
+            });
+
+
+            Optional<ButtonType> result = dialog.showAndWait();
+            if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+                List<ReturnItem> returnItems = new ArrayList<>();
+                BigDecimal totalRefund = BigDecimal.ZERO;
+
+                for (OrderItem item : returnItemsTable.getItems()) {
+                    TextField tf = (TextField) quantityToReturnCol.getCellObservableValue(item).getValue();
+                    int qtyToReturn = Integer.parseInt(tf.getText());
+                    if (qtyToReturn > 0) {
+                        ReturnItem returnItem = new ReturnItem();
+                        returnItem.setOrderItemId(item.getId());
+                        returnItem.setQuantityReturned(qtyToReturn);
+                        returnItems.add(returnItem);
+                        totalRefund = totalRefund.add(item.getPriceAtPurchase().multiply(new BigDecimal(qtyToReturn)));
+                    }
+                }
+
+                if (!returnItems.isEmpty()) {
+                    Return newReturn = new Return();
+                    newReturn.setOrderId(order.id);
+                    newReturn.setProcessedByUserId(SessionManager.getCurrentUser().getId());
+                    newReturn.setTotalRefundAmount(totalRefund);
+                    newReturn.setReturnItems(returnItems);
+
+                    returnsService.processReturn(newReturn);
+                    showAlert(Alert.AlertType.INFORMATION, "Success", "Return processed successfully.");
+                }
+            }
+
+        } catch (Exception e) {
+            showError("Error", "Could not open return dialog.", e.getMessage());
+        }
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {

@@ -8,6 +8,7 @@ com/yourcompany/cafeteria/dao/SettingsDAO.class
 com/yourcompany/cafeteria/ui/ItemsController.class
 com/yourcompany/cafeteria/model/Order.class
 com/yourcompany/cafeteria/service/ShiftService.class
+com/yourcompany/cafeteria/service/ReturnsService.class
 com/yourcompany/cafeteria/service/SettingsService.class
 com/yourcompany/cafeteria/model/Shift.class
 com/yourcompany/cafeteria/model/ShiftSummary.class
@@ -30,7 +31,9 @@ com/yourcompany/cafeteria/ui/LoginController.class
 com/yourcompany/cafeteria/ui/ExpensesController.class
 com/yourcompany/cafeteria/model/Item.class
 com/yourcompany/cafeteria/ui/ShiftsController.class
+com/yourcompany/cafeteria/model/Return.class
 com/yourcompany/cafeteria/ui/ReceiptController.class
+com/yourcompany/cafeteria/model/ReturnItem.class
 com/yourcompany/cafeteria/dao/ReportsDAO.class
 com/yourcompany/cafeteria/service/PrinterService.class
 com/yourcompany/cafeteria/dao/ShiftsDAO.class
@@ -39,6 +42,7 @@ com/yourcompany/cafeteria/ui/MainController.class
 com/yourcompany/cafeteria/ui/UsersController.class
 com/yourcompany/cafeteria/dao/OrderItemsDAO.class
 com/yourcompany/cafeteria/util/SessionManager.class
+com/yourcompany/cafeteria/dao/ReturnsDAO.class
 com/yourcompany/cafeteria/model/OrderItem.class
 com/yourcompany/cafeteria/dao/ExpensesDAO.class
 com/yourcompany/cafeteria/util/EscPosBuilder.class
