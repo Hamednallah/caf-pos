@@ -73,4 +73,14 @@ public class OrderItem {
     public void setLineTotal(BigDecimal lineTotal) {
         this.lineTotal = lineTotal;
     }
+
+    private int quantityToReturn;
+
+    public int getQuantityToReturn() {
+        return quantityToReturn;
+    }
+
+    public void setQuantityToReturn(int quantityToReturn) {
+        this.quantityToReturn = quantityToReturn;
+    }
 }

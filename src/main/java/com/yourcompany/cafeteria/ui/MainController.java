@@ -23,6 +23,8 @@ public class MainController implements Initializable {
     @FXML
     private Button usersButton;
     @FXML
+    private Button dashboardButton;
+    @FXML
     private Label shiftStatusLabel;
     @FXML
     private Label currentUserLabel;
@@ -48,14 +50,20 @@ public class MainController implements Initializable {
             if (SessionManager.getCurrentUser().getRoleId() == 1) { // ADMIN
                 usersButton.setVisible(true);
                 usersButton.setManaged(true);
+                dashboardButton.setVisible(true);
+                dashboardButton.setManaged(true);
             } else {
                 usersButton.setVisible(false);
                 usersButton.setManaged(false);
+                dashboardButton.setVisible(false);
+                dashboardButton.setManaged(false);
             }
         } else {
             currentUserLabel.setText(resources.getString("main.notLoggedIn"));
             usersButton.setVisible(false);
             usersButton.setManaged(false);
+            dashboardButton.setVisible(false);
+            dashboardButton.setManaged(false);
         }
 
         // Update shift status
@@ -67,6 +75,11 @@ public class MainController implements Initializable {
 
         // Load the default view on startup
         showSalesView();
+    }
+
+    @FXML
+    private void showDashboardView() {
+        loadView("/fxml/DashboardView.fxml");
     }
 
     @FXML

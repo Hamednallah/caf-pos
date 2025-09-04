@@ -25,6 +25,7 @@ public class ReturnsService {
         }
         // Additional validation can be added here, e.g., check if quantities are valid
 
+        // TODO: Integrate with shift totals. This will likely involve creating a negative expense or a new transaction type.
         return returnsDAO.insertReturn(newReturn);
     }
 }

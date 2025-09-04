@@ -27,4 +27,32 @@ public class ExpensesDAO {
     }
     return expenses;
   }
+
+    public java.math.BigDecimal getTotalExpenses() throws SQLException {
+        String sql = "SELECT SUM(amount) FROM expense";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            return rs.next() ? rs.getBigDecimal(1) : java.math.BigDecimal.ZERO;
+        }
+    }
+
+    public java.math.BigDecimal getExpensesForCurrentMonth() throws SQLException {
+        String sql = "SELECT SUM(amount) FROM expense WHERE MONTH(recorded_at) = MONTH(CURRENT_DATE()) AND YEAR(recorded_at) = YEAR(CURRENT_DATE())";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            return rs.next() ? rs.getBigDecimal(1) : java.math.BigDecimal.ZERO;
+        }
+    }
+
+    public java.math.BigDecimal getAverageDailyExpenses() throws SQLException {
+        String sql = "SELECT AVG(daily_total) FROM (SELECT SUM(amount) as daily_total FROM expense GROUP BY CAST(recorded_at AS DATE))";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            return rs.next() ? rs.getBigDecimal(1) : java.math.BigDecimal.ZERO;
+        }
+    }
+
+    public java.math.BigDecimal getAverageMonthlyExpenses() throws SQLException {
+        String sql = "SELECT AVG(monthly_total) FROM (SELECT SUM(amount) as monthly_total FROM expense GROUP BY YEAR(recorded_at), MONTH(recorded_at))";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            return rs.next() ? rs.getBigDecimal(1) : java.math.BigDecimal.ZERO;
+        }
+    }
 }

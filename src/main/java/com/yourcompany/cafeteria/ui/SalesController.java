@@ -20,6 +20,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -82,7 +83,7 @@ public class SalesController implements Initializable {
             updateButtonStates();
             updateTotals();
         } catch (Exception e) {
-            showError("Initialization Error", "Failed to initialize sales screen.", e.getMessage());
+            showError(resources.getString("sales.error.init.title"), resources.getString("sales.error.init.header"), e.getMessage());
         }
     }
 
@@ -308,7 +309,7 @@ public class SalesController implements Initializable {
                 showAlert(Alert.AlertType.WARNING, resources.getString("sales.orderSearch.notFound.title"), MessageFormat.format(resources.getString("sales.orderSearch.notFound.message"), orderId));
             }
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, resources.getString("sales.orderSearch.error.title"), "Order ID must be a number.");
+            showAlert(Alert.AlertType.ERROR, resources.getString("sales.orderSearch.error.title"), resources.getString("sales.error.orderId.nan"));
         } catch (Exception e) {
             showError(resources.getString("sales.orderSearch.error.title"), resources.getString("sales.orderSearch.error.message"), e.getMessage());
         }
@@ -323,9 +324,9 @@ public class SalesController implements Initializable {
         dialog.getDialogPane().getButtonTypes().addAll(returnButtonType, editButtonType, ButtonType.CANCEL);
 
         VBox vbox = new VBox();
-        vbox.getChildren().add(new Label("Order ID: " + order.id));
-        vbox.getChildren().add(new Label("Total: " + order.totalAmount));
-        vbox.getChildren().add(new Label("Date: " + order.createdAt));
+        vbox.getChildren().add(new Label(resources.getString("sales.orderDetails.orderId") + " " + order.id));
+        vbox.getChildren().add(new Label(resources.getString("sales.orderDetails.total") + " " + order.totalAmount));
+        vbox.getChildren().add(new Label(resources.getString("sales.orderDetails.date") + " " + order.createdAt));
         dialog.getDialogPane().setContent(vbox);
 
         dialog.showAndWait().ifPresent(response -> {
@@ -356,7 +357,7 @@ public class SalesController implements Initializable {
             TableView<OrderItem> returnItemsTable = (TableView<OrderItem>) dialogPane.lookup("#returnItemsTable");
             TableColumn<OrderItem, String> itemNameCol = (TableColumn<OrderItem, String>) returnItemsTable.getColumns().get(0);
             TableColumn<OrderItem, Integer> quantitySoldCol = (TableColumn<OrderItem, Integer>) returnItemsTable.getColumns().get(1);
-            TableColumn<OrderItem, TextField> quantityToReturnCol = (TableColumn<OrderItem, TextField>) returnItemsTable.getColumns().get(2);
+            TableColumn<OrderItem, Integer> quantityToReturnCol = (TableColumn<OrderItem, Integer>) returnItemsTable.getColumns().get(2);
             Label refundTotalLabel = (Label) dialogPane.lookup("#refundTotalLabel");
 
             itemNameCol.setCellValueFactory(new PropertyValueFactory<>("itemName"));
@@ -365,26 +366,8 @@ public class SalesController implements Initializable {
             ObservableList<OrderItem> itemsToReturn = FXCollections.observableArrayList(order.items);
             returnItemsTable.setItems(itemsToReturn);
 
-            quantityToReturnCol.setCellValueFactory(cellData -> {
-                TextField textField = new TextField("0");
-                textField.textProperty().addListener((obs, oldVal, newVal) -> {
-                    // Update total refund amount
-                    BigDecimal totalRefund = BigDecimal.ZERO;
-                    for (OrderItem item : returnItemsTable.getItems()) {
-                        TextField tf = (TextField) quantityToReturnCol.getCellObservableValue(item).getValue();
-                        int qtyToReturn = 0;
-                        try {
-                            qtyToReturn = Integer.parseInt(tf.getText());
-                        } catch (NumberFormatException e) {
-                            // ignore
-                        }
-                        totalRefund = totalRefund.add(item.getPriceAtPurchase().multiply(new BigDecimal(qtyToReturn)));
-                    }
-                    refundTotalLabel.setText(resources.getString("sales.returns.dialog.totalRefund") + " " + String.format("%.2f", totalRefund));
-                });
-                return new SimpleObjectProperty<>(textField);
-            });
-
+            quantityToReturnCol.setCellValueFactory(new PropertyValueFactory<>("quantityToReturn"));
+            quantityToReturnCol.setCellFactory(col -> new EditingCell(refundTotalLabel, resources));
 
             Optional<ButtonType> result = dialog.showAndWait();
             if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
@@ -392,14 +375,12 @@ public class SalesController implements Initializable {
                 BigDecimal totalRefund = BigDecimal.ZERO;
 
                 for (OrderItem item : returnItemsTable.getItems()) {
-                    TextField tf = (TextField) quantityToReturnCol.getCellObservableValue(item).getValue();
-                    int qtyToReturn = Integer.parseInt(tf.getText());
-                    if (qtyToReturn > 0) {
+                    if (item.getQuantityToReturn() > 0) {
                         ReturnItem returnItem = new ReturnItem();
                         returnItem.setOrderItemId(item.getId());
-                        returnItem.setQuantityReturned(qtyToReturn);
+                        returnItem.setQuantityReturned(item.getQuantityToReturn());
                         returnItems.add(returnItem);
-                        totalRefund = totalRefund.add(item.getPriceAtPurchase().multiply(new BigDecimal(qtyToReturn)));
+                        totalRefund = totalRefund.add(item.getPriceAtPurchase().multiply(new BigDecimal(item.getQuantityToReturn())));
                     }
                 }
 
@@ -411,12 +392,12 @@ public class SalesController implements Initializable {
                     newReturn.setReturnItems(returnItems);
 
                     returnsService.processReturn(newReturn);
-                    showAlert(Alert.AlertType.INFORMATION, "Success", "Return processed successfully.");
+                    showAlert(Alert.AlertType.INFORMATION, resources.getString("sales.returns.success.title"), resources.getString("sales.returns.success.message"));
                 }
             }
 
         } catch (Exception e) {
-            showError("Error", "Could not open return dialog.", e.getMessage());
+            showError(resources.getString("sales.returns.error.dialog.title"), resources.getString("sales.returns.error.dialog.header"), e.getMessage());
         }
     }
 
@@ -434,5 +415,70 @@ public class SalesController implements Initializable {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    private static class EditingCell extends TableCell<OrderItem, Integer> {
+        private final TextField textField = new TextField();
+        private final Label refundTotalLabel;
+        private final ResourceBundle resources;
+
+        public EditingCell(Label refundTotalLabel, ResourceBundle resources) {
+            this.refundTotalLabel = refundTotalLabel;
+            this.resources = resources;
+            textField.setOnAction(evt -> commitEdit(Integer.parseInt(textField.getText())));
+            textField.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (!newVal.matches("\\d*")) {
+                    textField.setText(newVal.replaceAll("[^\\d]", ""));
+                }
+                updateTotal();
+            });
+        }
+
+        @Override
+        public void startEdit() {
+            super.startEdit();
+            setText(null);
+            setGraphic(textField);
+            textField.selectAll();
+        }
+
+        @Override
+        public void cancelEdit() {
+            super.cancelEdit();
+            setText(getItem().toString());
+            setGraphic(null);
+        }
+
+        @Override
+        public void updateItem(Integer item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                if (isEditing()) {
+                    setText(null);
+                    setGraphic(textField);
+                } else {
+                    setText(getItem().toString());
+                    setGraphic(null);
+                }
+            }
+        }
+
+        private void updateTotal() {
+            BigDecimal totalRefund = BigDecimal.ZERO;
+            for (OrderItem item : getTableView().getItems()) {
+                totalRefund = totalRefund.add(item.getPriceAtPurchase().multiply(new BigDecimal(item.getQuantityToReturn())));
+            }
+            refundTotalLabel.setText(resources.getString("sales.returns.dialog.totalRefund") + " " + String.format("%.2f", totalRefund));
+        }
+
+        @Override
+        public void commitEdit(Integer newValue) {
+            super.commitEdit(newValue);
+            ((OrderItem)getTableRow().getItem()).setQuantityToReturn(newValue);
+            updateTotal();
+        }
     }
 }

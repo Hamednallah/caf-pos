@@ -1,12 +1,15 @@
 com/yourcompany/cafeteria/service/UsersService.class
 com/yourcompany/cafeteria/util/DataSourceProvider.class
 com/yourcompany/cafeteria/dao/UsersDAO.class
+com/yourcompany/cafeteria/ui/SalesController$EditingCell.class
 com/yourcompany/cafeteria/model/DateRangeReport.class
 com/yourcompany/cafeteria/ui/ReportsController$DailySalesReportItem.class
 com/yourcompany/cafeteria/dao/ItemsDAO.class
 com/yourcompany/cafeteria/dao/SettingsDAO.class
+com/yourcompany/cafeteria/model/DashboardStats.class
 com/yourcompany/cafeteria/ui/ItemsController.class
 com/yourcompany/cafeteria/model/Order.class
+com/yourcompany/cafeteria/service/DashboardService.class
 com/yourcompany/cafeteria/service/ShiftService.class
 com/yourcompany/cafeteria/service/ReturnsService.class
 com/yourcompany/cafeteria/service/SettingsService.class
@@ -41,6 +44,7 @@ com/yourcompany/cafeteria/model/ShiftReport.class
 com/yourcompany/cafeteria/ui/MainController.class
 com/yourcompany/cafeteria/ui/UsersController.class
 com/yourcompany/cafeteria/dao/OrderItemsDAO.class
+com/yourcompany/cafeteria/ui/DashboardController.class
 com/yourcompany/cafeteria/util/SessionManager.class
 com/yourcompany/cafeteria/dao/ReturnsDAO.class
 com/yourcompany/cafeteria/model/OrderItem.class

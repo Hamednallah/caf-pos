@@ -19,8 +19,12 @@ public class UsersService {
         return usersDAO.findByUsername(username);
     }
 
-    public int createUser(String username, String passwordHash, String fullName, int roleId) throws SQLException {
-        return usersDAO.createUser(username, passwordHash, fullName, roleId);
+    public int createUser(User user, String plainTextPassword) throws SQLException {
+        if (plainTextPassword == null || plainTextPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty.");
+        }
+        String hashedPassword = BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
+        return usersDAO.createUser(user.getUsername(), hashedPassword, user.getFullName(), user.getRoleId());
     }
 
     public User authenticate(String username, String plainTextPassword) throws SQLException {
@@ -35,7 +39,15 @@ public class UsersService {
         return usersDAO.listAll();
     }
 
-    public void updateUser(User user) throws SQLException {
+    public void updateUser(User user, String plainTextPassword) throws SQLException {
+        if (plainTextPassword != null && !plainTextPassword.trim().isEmpty()) {
+            String hashedPassword = BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
+            user.setPasswordHash(hashedPassword);
+        } else {
+            // Keep the old password hash
+            User oldUser = usersDAO.findById(user.getId());
+            user.setPasswordHash(oldUser.getPasswordHash());
+        }
         usersDAO.updateUser(user);
     }
 

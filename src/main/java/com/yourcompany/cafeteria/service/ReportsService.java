@@ -59,13 +59,13 @@ public class ReportsService {
         BigDecimal totalSales = BigDecimal.ZERO;
         BigDecimal totalCashSales = BigDecimal.ZERO;
         BigDecimal totalBankSales = BigDecimal.ZERO;
-        ResultSet ordersRs = ordersDAO.getOrdersByShift(shiftId);
-        while (ordersRs.next()) {
-            BigDecimal totalAmount = ordersRs.getBigDecimal("total_amount");
-            BigDecimal discount = ordersRs.getBigDecimal("discount_amount");
+        List<com.yourcompany.cafeteria.model.Order> orders = ordersDAO.getOrdersByShift(shiftId);
+        for (com.yourcompany.cafeteria.model.Order order : orders) {
+            BigDecimal totalAmount = order.totalAmount;
+            BigDecimal discount = order.discountAmount;
             BigDecimal finalAmount = totalAmount.subtract(discount);
             totalSales = totalSales.add(finalAmount);
-            if ("CASH".equalsIgnoreCase(ordersRs.getString("payment_method"))) {
+            if ("CASH".equalsIgnoreCase(order.paymentMethod)) {
                 totalCashSales = totalCashSales.add(finalAmount);
             } else {
                 totalBankSales = totalBankSales.add(finalAmount);

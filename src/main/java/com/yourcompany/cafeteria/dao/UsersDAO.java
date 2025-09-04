@@ -78,4 +78,15 @@ public class UsersDAO {
           ps.executeUpdate();
       }
   }
+
+    public java.util.Map<String, Integer> countUsersByRole() throws SQLException {
+        java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+        String sql = "SELECT r.name, COUNT(u.id) as user_count FROM role r LEFT JOIN \"user\" u ON r.id = u.role_id GROUP BY r.name";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                counts.put(rs.getString("name"), rs.getInt("user_count"));
+            }
+        }
+        return counts;
+    }
 }

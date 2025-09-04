@@ -121,21 +121,17 @@ public class UsersController implements Initializable {
             Optional<ButtonType> result = dialog.showAndWait();
             if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
                 String password = passwordField.getText();
-                String passwordHash = (password != null && !password.isEmpty()) ? BCrypt.hashpw(password, BCrypt.gensalt()) : (user != null ? user.getPasswordHash() : null);
 
                 User updatedUser = user == null ? new User() : user;
                 updatedUser.setUsername(usernameField.getText());
                 updatedUser.setFullName(fullNameField.getText());
                 updatedUser.setRoleId(roleComboBox.getSelectionModel().getSelectedItem().equals("Admin") ? 1 : 2);
                 updatedUser.setActive(activeCheckBox.isSelected());
-                if (passwordHash != null) {
-                    updatedUser.setPasswordHash(passwordHash);
-                }
 
                 if (user == null) {
-                    usersService.createUser(updatedUser.getUsername(), updatedUser.getPasswordHash(), updatedUser.getFullName(), updatedUser.getRoleId());
+                    usersService.createUser(updatedUser, password);
                 } else {
-                    usersService.updateUser(updatedUser);
+                    usersService.updateUser(updatedUser, password);
                 }
 
                 loadUsers();
