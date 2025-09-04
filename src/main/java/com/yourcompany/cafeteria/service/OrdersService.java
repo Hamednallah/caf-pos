@@ -23,4 +23,8 @@ public class OrdersService {
         }
         return dao.createOrderTransactional(o);
     }
+
+    public Order findById(int orderId) throws Exception {
+        return dao.findById(orderId);
+    }
 }

@@ -1,13 +1,15 @@
 package com.yourcompany.cafeteria.model;
 
+import javafx.beans.property.SimpleIntegerProperty;
+
 import java.math.BigDecimal;
 
 public class OrderItem {
+    private final SimpleIntegerProperty returnQuantity = new SimpleIntegerProperty(0);
     private Integer id;
     private Integer orderId;
     private Integer itemId;
     private int quantity;
-    private BigDecimal priceAtPurchase;
     private BigDecimal lineTotal;
 
     // This is for display purposes in the cart, not persisted.
@@ -45,14 +47,6 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
-    public BigDecimal getPriceAtPurchase() {
-        return priceAtPurchase;
-    }
-
-    public void setPriceAtPurchase(BigDecimal priceAtPurchase) {
-        this.priceAtPurchase = priceAtPurchase;
-    }
-
     public String getItemName() {
         return itemName;
     }
@@ -62,15 +56,22 @@ public class OrderItem {
     }
 
     public BigDecimal getLineTotal() {
-        // If price is available, calculate on the fly for the cart view.
-        if (priceAtPurchase != null) {
-            return priceAtPurchase.multiply(new BigDecimal(quantity));
-        }
-        // Otherwise, return the value from the database (for loaded orders).
         return lineTotal;
     }
 
     public void setLineTotal(BigDecimal lineTotal) {
         this.lineTotal = lineTotal;
+    }
+
+    public int getReturnQuantity() {
+        return returnQuantity.get();
+    }
+
+    public SimpleIntegerProperty returnQuantityProperty() {
+        return returnQuantity;
+    }
+
+    public void setReturnQuantity(int returnQuantity) {
+        this.returnQuantity.set(returnQuantity);
     }
 }

@@ -10,4 +10,48 @@ public class OrdersDAO {
     ps.setInt(1, shiftId);
     return ps.executeQuery();
   }
+
+  public Order findById(int orderId) throws SQLException {
+      Order order = null;
+      String orderSql = "SELECT * FROM \"order\" WHERE id = ?";
+      try (PreparedStatement ps = conn.prepareStatement(orderSql)) {
+          ps.setInt(1, orderId);
+          try (ResultSet rs = ps.executeQuery()) {
+              if (rs.next()) {
+                  order = new Order();
+                  order.setId(rs.getInt("id"));
+                  order.setCashierId(rs.getInt("cashier_id"));
+                  order.setShiftId(rs.getInt("shift_id"));
+                  order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                  order.setTotalAmount(rs.getBigDecimal("total_amount"));
+                  order.setDiscountAmount(rs.getBigDecimal("discount_amount"));
+                  order.setStatus(rs.getString("status"));
+                  order.setPaymentMethod(rs.getString("payment_method"));
+                  order.setPaymentConfirmed(rs.getBoolean("payment_confirmed"));
+              }
+          }
+      }
+
+      if (order != null) {
+          String itemsSql = "SELECT oi.*, i.name as item_name FROM order_item oi JOIN item i ON oi.item_id = i.id WHERE oi.order_id = ?";
+          try (PreparedStatement ps = conn.prepareStatement(itemsSql)) {
+              ps.setInt(1, orderId);
+              java.util.List<OrderItem> items = new java.util.ArrayList<>();
+              try (ResultSet rs = ps.executeQuery()) {
+                  while (rs.next()) {
+                      OrderItem item = new OrderItem();
+                      item.setId(rs.getInt("id"));
+                      item.setOrderId(rs.getInt("order_id"));
+                      item.setItemId(rs.getInt("item_id"));
+                      item.setQuantity(rs.getInt("quantity"));
+                      item.setLineTotal(rs.getBigDecimal("line_total"));
+                      item.setItemName(rs.getString("item_name"));
+                      items.add(item);
+                  }
+              }
+              order.setItems(items);
+          }
+      }
+      return order;
+  }
 }

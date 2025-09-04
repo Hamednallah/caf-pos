@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 
 public class ReceiptController {
@@ -22,11 +23,12 @@ public class ReceiptController {
 
         itemsVBox.getChildren().clear();
         for (OrderItem item : order.getItems()) {
+            BigDecimal pricePerItem = item.getLineTotal().divide(new java.math.BigDecimal(item.getQuantity()));
             Label itemLabel = new Label(
                 String.format("%d x %s @ %.2f = %.2f",
                     item.getQuantity(),
                     item.getItemName(),
-                    item.getPriceAtPurchase(),
+                    pricePerItem,
                     item.getLineTotal()
                 )
             );

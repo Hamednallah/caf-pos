@@ -149,7 +149,7 @@ public class SalesController {
             newOrderItem.setItemId(item.getId());
             newOrderItem.setItemName(item.getName());
             newOrderItem.setQuantity(1);
-            newOrderItem.setPriceAtPurchase(item.getPrice());
+            newOrderItem.setLineTotal(item.getPrice());
             cart.add(newOrderItem);
         }
     }

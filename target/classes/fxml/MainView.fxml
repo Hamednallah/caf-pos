@@ -22,6 +22,7 @@
                 <Button onAction="#showShiftsView" styleClass="sidebar-button" text="%main.button.shifts" maxWidth="Infinity"/>
                 <Button onAction="#showExpensesView" styleClass="sidebar-button" text="%main.button.expenses" maxWidth="Infinity"/>
                 <Button onAction="#showReportsView" styleClass="sidebar-button" text="%main.button.reports" maxWidth="Infinity"/>
+                <Button onAction="#showReturnsView" styleClass="sidebar-button" text="%main.button.returns" maxWidth="Infinity"/>
                 <Button fx:id="usersButton" onAction="#showUsersView" styleClass="sidebar-button" text="%main.button.users" maxWidth="Infinity"/>
                 <Button onAction="#showSettingsView" styleClass="sidebar-button" text="%main.button.settings" maxWidth="Infinity"/>
             </children>

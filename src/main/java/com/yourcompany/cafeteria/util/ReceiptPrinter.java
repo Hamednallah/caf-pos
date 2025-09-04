@@ -100,10 +100,11 @@ public class ReceiptPrinter {
 
         for (OrderItem item : order.items) {
             String itemName = item.getItemName() != null ? item.getItemName() : "Item #" + item.getItemId();
+            BigDecimal pricePerItem = item.getLineTotal().divide(new BigDecimal(item.getQuantity()));
             String itemLine = String.format("%-24s %2d x %5.2f = %6.2f",
                     itemName.length() > 24 ? itemName.substring(0, 24) : itemName,
                     item.getQuantity(),
-                    item.getPriceAtPurchase(),
+                    pricePerItem,
                     item.getLineTotal());
             builder.append(itemLine).feedLine();
         }

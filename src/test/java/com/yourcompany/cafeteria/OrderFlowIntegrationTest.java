@@ -76,7 +76,7 @@ public class OrderFlowIntegrationTest {
         OrderItem coffeeItem = new OrderItem();
         coffeeItem.setItemId(coffeeId);
         coffeeItem.setQuantity(2);
-        coffeeItem.setPriceAtPurchase(testCoffee.getPrice()); // Price at time of sale
+        coffeeItem.setLineTotal(testCoffee.getPrice().multiply(new BigDecimal("2")));
 
         order.items = Collections.singletonList(coffeeItem);
         order.totalAmount = coffeeItem.getLineTotal();

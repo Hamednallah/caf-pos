@@ -48,6 +48,11 @@ public class MainController implements ResourceAwareController {
     }
 
     @FXML
+    private void showReturnsView() {
+        loadView("/fxml/ReturnsView.fxml");
+    }
+
+    @FXML
     public void initialize() {
         // Perform startup checks before loading any views
         try (var c = DataSourceProvider.getConnection()) {

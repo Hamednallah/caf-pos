@@ -10,6 +10,7 @@
 /app/src/test/java/com/yourcompany/cafeteria/service/ItemsServiceTest.java
 /app/src/test/java/com/yourcompany/cafeteria/service/OrdersServiceTest.java
 /app/src/test/java/com/yourcompany/cafeteria/service/ReportsServiceTest.java
+/app/src/test/java/com/yourcompany/cafeteria/service/ReturnsServiceTest.java
 /app/src/test/java/com/yourcompany/cafeteria/service/ShiftServiceTest.java
 /app/src/test/java/com/yourcompany/cafeteria/service/UsersServiceTest.java
 /app/src/test/java/com/yourcompany/cafeteria/ui/SettingsViewTest.java
