@@ -7,6 +7,14 @@ import com.yourcompany.cafeteria.util.ReceiptPrinter;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import com.yourcompany.cafeteria.service.BackupService;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+
+import java.io.File;
+import java.util.Optional;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 
@@ -14,11 +22,20 @@ public class SettingsController {
 
     @FXML private ComboBox<String> printerCombo;
     @FXML private Label statusLabel;
+    @FXML private Button backupButton;
+    @FXML private Button restoreButton;
+
+    private BackupService backupService;
 
     @FXML
     public void initialize() {
-        loadPrinters();
-        loadCurrentSettings();
+        try {
+            backupService = new BackupService();
+            loadPrinters();
+            loadCurrentSettings();
+        } catch (Exception e) {
+            showError("Initialization Error", "Could not initialize settings service.", e.getMessage());
+        }
     }
 
     private void loadPrinters() {
@@ -143,5 +160,54 @@ public class SettingsController {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleBackup() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Database Backup");
+        fileChooser.setInitialFileName("cafeteria-backup-" + java.time.LocalDate.now() + ".sql");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("SQL Files", "*.sql"));
+        File file = fileChooser.showSaveDialog(getStage());
+
+        if (file != null) {
+            try {
+                backupService.backupDatabase(file.getAbsolutePath());
+                showAlert(Alert.AlertType.INFORMATION, "Backup Successful", "Database backed up successfully to:\n" + file.getAbsolutePath());
+            } catch (Exception e) {
+                showError("Backup Failed", "Could not create database backup.", e.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    private void handleRestore() {
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Confirm Restore");
+        confirmation.setHeaderText("Are you sure you want to restore the database?");
+        confirmation.setContentText("This will overwrite all current data and require an application restart. This action cannot be undone.");
+
+        Optional<ButtonType> result = confirmation.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open Database Backup");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("SQL Files", "*.sql"));
+            File file = fileChooser.showOpenDialog(getStage());
+
+            if (file != null) {
+                try {
+                    backupService.restoreDatabase(file.getAbsolutePath());
+                    showAlert(Alert.AlertType.INFORMATION, "Restore Successful", "Database restored successfully. Please restart the application now.");
+                    // In a real app, you might force a restart here.
+                    // e.g., Platform.exit();
+                } catch (Exception e) {
+                    showError("Restore Failed", "Could not restore database from backup.", e.getMessage());
+                }
+            }
+        }
+    }
+
+    private Stage getStage() {
+        return (Stage) statusLabel.getScene().getWindow();
     }
 }

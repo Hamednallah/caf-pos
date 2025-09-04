@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -24,5 +25,15 @@
             </children>
         </HBox>
         <Label fx:id="statusLabel" text=""/>
+
+        <TitledPane text="Backup & Restore" VBox.vgrow="NEVER">
+            <content>
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10;">
+                    <Label text="Create a backup of the current database or restore from a file."/>
+                    <Button fx:id="backupButton" text="Backup Now" onAction="#handleBackup"/>
+                    <Button fx:id="restoreButton" text="Restore from Backup" onAction="#handleRestore"/>
+                </HBox>
+            </content>
+        </TitledPane>
     </children>
 </VBox>

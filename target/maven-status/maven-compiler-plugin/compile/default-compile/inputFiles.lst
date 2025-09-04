@@ -21,6 +21,7 @@
 /app/src/main/java/com/yourcompany/cafeteria/model/ShiftReport.java
 /app/src/main/java/com/yourcompany/cafeteria/model/ShiftSummary.java
 /app/src/main/java/com/yourcompany/cafeteria/model/User.java
+/app/src/main/java/com/yourcompany/cafeteria/service/BackupService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/ExpenseService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/ItemsService.java
 /app/src/main/java/com/yourcompany/cafeteria/service/OrdersService.java
