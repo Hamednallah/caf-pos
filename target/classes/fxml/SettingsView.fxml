@@ -19,8 +19,16 @@
         </HBox>
         <HBox spacing="10" alignment="CENTER_LEFT">
             <children>
+                <Label text="%settings.dbPath" minWidth="150"/>
+                <TextField fx:id="dbPathField" HBox.hgrow="ALWAYS" editable="false"/>
+                <Button fx:id="browseDbPathButton" text="%settings.browse"/>
+            </children>
+        </HBox>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <children>
                 <Button fx:id="saveButton" text="%settings.save" onAction="#handleSaveSettings"/>
                 <Button fx:id="testPrintButton" text="%settings.testPrint" onAction="#handleTestPrint"/>
+                <Button fx:id="backupButton" text="%settings.backup" onAction="#handleBackup"/>
             </children>
         </HBox>
         <Label fx:id="statusLabel" text=""/>

@@ -44,6 +44,7 @@
 /app/src/main/java/com/yourcompany/cafeteria/ui/SettingsController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/ShiftsController.java
 /app/src/main/java/com/yourcompany/cafeteria/ui/UsersController.java
+/app/src/main/java/com/yourcompany/cafeteria/util/ConfigManager.java
 /app/src/main/java/com/yourcompany/cafeteria/util/DataSourceProvider.java
 /app/src/main/java/com/yourcompany/cafeteria/util/EscPosBuilder.java
 /app/src/main/java/com/yourcompany/cafeteria/util/ReceiptPrinter.java

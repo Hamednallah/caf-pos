@@ -1,3 +1,4 @@
+com/yourcompany/cafeteria/util/ConfigManager.class
 com/yourcompany/cafeteria/service/UsersService.class
 com/yourcompany/cafeteria/util/DataSourceProvider.class
 com/yourcompany/cafeteria/dao/UsersDAO.class
