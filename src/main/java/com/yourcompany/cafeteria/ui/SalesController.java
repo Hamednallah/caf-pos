@@ -122,7 +122,7 @@ public class SalesController {
 
         List<Item> filteredItems = allItems.stream()
                 .filter(item -> {
-                    boolean categoryMatch = selectedCategory == null || item.getCategoryId() == selectedCategory.getId();
+                    boolean categoryMatch = selectedCategory == null || (item.getCategory() != null && item.getCategory().getId() == selectedCategory.getId());
                     boolean searchMatch = searchText.isEmpty() || item.getName().toLowerCase().contains(searchText);
                     return categoryMatch && searchMatch;
                 })

@@ -4,8 +4,6 @@ import com.yourcompany.cafeteria.dao.ExpensesDAO;
 import com.yourcompany.cafeteria.dao.OrdersDAO;
 import com.yourcompany.cafeteria.dao.ReportsDAO;
 import com.yourcompany.cafeteria.dao.ShiftsDAO;
-import com.yourcompany.cafeteria.model.DateRangeReport;
-import com.yourcompany.cafeteria.model.ShiftReport;
 import com.yourcompany.cafeteria.model.ShiftSummary;
 
 import java.math.BigDecimal;
@@ -82,11 +80,11 @@ public class ReportsService {
         return summary;
     }
 
-    public ShiftReport getShiftReport(int shiftId) throws Exception {
+    public com.yourcompany.cafeteria.model.ShiftReport getShiftReport(int shiftId) throws Exception {
         return dao.getShiftReport(shiftId);
     }
 
-    public DateRangeReport getDateRangeReport(LocalDate from, LocalDate to) throws Exception {
+    public com.yourcompany.cafeteria.model.DateRangeReport getDateRangeReport(LocalDate from, LocalDate to) throws Exception {
         if (from == null || to == null || from.isAfter(to)) {
             throw new IllegalArgumentException("Invalid date range.");
         }

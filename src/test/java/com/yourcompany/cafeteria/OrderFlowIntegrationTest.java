@@ -94,8 +94,7 @@ public class OrderFlowIntegrationTest {
 
         // 5. End the shift and get the summary
         ShiftSummary summary = reportsService.getShiftSummary(shiftId);
-        BigDecimal expectedCash = summary.getExpectedCashInDrawer();
-        shiftService.endShift(shiftId, expectedCash);
+        shiftService.endShift(shiftId, summary.getExpectedCashInDrawer());
 
         // 6. Assertions
         assertEquals(0, new BigDecimal("100.00").compareTo(summary.getStartingFloat()), "Starting float should be 100.00");
@@ -103,6 +102,7 @@ public class OrderFlowIntegrationTest {
         assertEquals(0, new BigDecimal("15.00").compareTo(summary.getTotalExpenses()), "Total expenses should be 15.00");
 
         // Expected cash = 100.00 (start) + 5.00 (sales) - 15.00 (expenses) = 90.00
-        assertEquals(0, expectedCash.compareTo(new BigDecimal("90.00")), "Expected cash in drawer should be 90.00");
+        BigDecimal expectedCash = new BigDecimal("90.00");
+        assertEquals(0, expectedCash.compareTo(summary.getExpectedCashInDrawer()), "Expected cash in drawer should be 90.00");
     }
 }

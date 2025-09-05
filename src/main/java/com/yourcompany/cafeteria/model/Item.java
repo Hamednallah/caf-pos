@@ -7,9 +7,8 @@ public class Item {
     private String name;
     private String description;
     private BigDecimal price;
-    private Integer categoryId;
+    private Category category;
     private String imagePath;
-    private Category category; // The associated Category object
 
     public int getId() {
         return id;
@@ -43,12 +42,12 @@ public class Item {
         this.price = price;
     }
 
-    public Integer getCategoryId() {
-        return categoryId;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public String getImagePath() {
@@ -57,16 +56,5 @@ public class Item {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-        if (category != null) {
-            this.categoryId = category.getId();
-        }
     }
 }

@@ -14,10 +14,10 @@ public class ShiftsDAO {
         this.conn = c;
     }
 
-    public int startShift(int cashierId, BigDecimal startingFloat) throws SQLException {
+    public int startShift(int userId, BigDecimal startingFloat) throws SQLException {
         String sql = "INSERT INTO shift(user_id, start_time, starting_float) VALUES (?, CURRENT_TIMESTAMP, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, cashierId);
+            ps.setInt(1, userId);
             ps.setBigDecimal(2, startingFloat);
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {

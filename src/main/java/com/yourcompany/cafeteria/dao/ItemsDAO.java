@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ItemsDAO {
     private final Connection conn;
-    private final String baseSelectSQL = "SELECT i.id, i.name, i.description, i.price, i.category_id, i.image_path, c.id as cat_id, c.name as cat_name, c.description as cat_desc FROM item i LEFT JOIN category c ON i.category_id = c.id";
+    private final String baseSelectSQL = "SELECT i.id, i.name, i.description, i.price, i.image_path, c.id as cat_id, c.name as cat_name, c.description as cat_desc FROM item i LEFT JOIN category c ON i.category_id = c.id";
 
     public ItemsDAO(Connection c) {
         this.conn = c;
@@ -21,12 +21,12 @@ public class ItemsDAO {
         i.setName(rs.getString("name"));
         i.setDescription(rs.getString("description"));
         i.setPrice(rs.getBigDecimal("price"));
-        i.setCategoryId((Integer) rs.getObject("category_id"));
         i.setImagePath(rs.getString("image_path"));
 
-        if (i.getCategoryId() != null) {
+        int categoryId = rs.getInt("cat_id");
+        if (!rs.wasNull()) {
             Category cat = new Category();
-            cat.setId(rs.getInt("cat_id"));
+            cat.setId(categoryId);
             cat.setName(rs.getString("cat_name"));
             cat.setDescription(rs.getString("cat_desc"));
             i.setCategory(cat);

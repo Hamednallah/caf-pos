@@ -3,7 +3,6 @@ package com.yourcompany.cafeteria.dao;
 import com.yourcompany.cafeteria.model.DateRangeReport;
 import com.yourcompany.cafeteria.model.ShiftReport;
 
-import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
 
@@ -22,33 +21,23 @@ public class ReportsDAO {
 
   public ShiftReport getShiftReport(int shiftId) throws SQLException {
     ShiftReport report = new ShiftReport();
-    report.setShiftId(shiftId);
 
-    // Get shift details (including cashier name)
-    String shiftSql = "SELECT s.start_time, s.end_time, s.starting_float, s.actual_cash, u.full_name " +
-                      "FROM shift s JOIN \"user\" u ON s.user_id = u.id WHERE s.id = ?";
-    try (PreparedStatement ps = conn.prepareStatement(shiftSql)) {
+    // Get starting float from shift table
+    try (PreparedStatement ps = conn.prepareStatement("SELECT starting_float FROM shift WHERE id = ?")) {
         ps.setInt(1, shiftId);
         try (ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                report.setStartTime(rs.getTimestamp("start_time").toLocalDateTime());
-                Timestamp endTime = rs.getTimestamp("end_time");
-                if (endTime != null) {
-                    report.setEndTime(endTime.toLocalDateTime());
-                }
                 report.setStartingFloat(rs.getBigDecimal("starting_float"));
-                report.setActualCash(rs.getBigDecimal("actual_cash"));
-                report.setCashierName(rs.getString("full_name"));
-            } else {
-                throw new SQLException("Shift not found with ID: " + shiftId);
             }
         }
     }
 
-    // Get order aggregates
     String orderSql = "SELECT " +
             "COALESCE(SUM(total_amount), 0) AS total_sales, " +
-            "COALESCE(SUM(CASE WHEN payment_method = 'CASH' THEN total_amount ELSE 0 END), 0) AS cash_total " +
+            "COALESCE(SUM(discount_amount), 0) AS total_discounts, " +
+            "COALESCE(SUM(CASE WHEN payment_method = 'CASH' THEN total_amount ELSE 0 END), 0) AS cash_total, " +
+            "COALESCE(SUM(CASE WHEN payment_method = 'BANK' THEN total_amount ELSE 0 END), 0) AS bank_total, " +
+            "COUNT(id) AS orders_count " +
             "FROM \"order\" " +
             "WHERE shift_id = ? AND status = 'FINALIZED' AND payment_confirmed = TRUE";
 
@@ -57,12 +46,14 @@ public class ReportsDAO {
       try (ResultSet rs = ps.executeQuery()) {
         if (rs.next()) {
           report.setTotalSales(rs.getBigDecimal("total_sales"));
+          report.setTotalDiscounts(rs.getBigDecimal("total_discounts"));
           report.setCashTotal(rs.getBigDecimal("cash_total"));
+          report.setBankTotal(rs.getBigDecimal("bank_total"));
+          report.setOrdersCount(rs.getLong("orders_count"));
         }
       }
     }
 
-    // Get expense aggregates
     String expenseSql = "SELECT COALESCE(SUM(amount), 0) AS total_expenses FROM expense WHERE shift_id = ?";
     try (PreparedStatement ps = conn.prepareStatement(expenseSql)) {
       ps.setInt(1, shiftId);
@@ -73,24 +64,18 @@ public class ReportsDAO {
       }
     }
 
-    // Calculate difference if shift is closed
-    if (report.getActualCash() != null) {
-        BigDecimal difference = report.getActualCash().subtract(report.getExpectedCash());
-        report.setDifference(difference);
-    }
-
     return report;
   }
 
   public DateRangeReport getDateRangeReport(LocalDate from, LocalDate to) throws SQLException {
     DateRangeReport report = new DateRangeReport();
-    String summarySql = "SELECT " +
+    String sql = "SELECT " +
             "COALESCE(SUM(total_amount), 0) AS total_sales, " +
             "COUNT(id) AS orders_count " +
             "FROM \"order\" " +
             "WHERE created_at >= ? AND created_at < ? AND status = 'FINALIZED' AND payment_confirmed = TRUE";
 
-    try (PreparedStatement ps = conn.prepareStatement(summarySql)) {
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
       ps.setTimestamp(1, Timestamp.valueOf(from.atStartOfDay()));
       ps.setTimestamp(2, Timestamp.valueOf(to.plusDays(1).atStartOfDay()));
       try (ResultSet rs = ps.executeQuery()) {
@@ -100,23 +85,6 @@ public class ReportsDAO {
         }
       }
     }
-
-    String byDaySql = "SELECT CAST(created_at AS DATE) AS sale_date, SUM(total_amount) AS daily_total " +
-            "FROM \"order\" " +
-            "WHERE created_at >= ? AND created_at < ? AND status = 'FINALIZED' AND payment_confirmed = TRUE " +
-            "GROUP BY sale_date ORDER BY sale_date";
-
-    try (PreparedStatement ps = conn.prepareStatement(byDaySql)) {
-        ps.setTimestamp(1, Timestamp.valueOf(from.atStartOfDay()));
-        ps.setTimestamp(2, Timestamp.valueOf(to.plusDays(1).atStartOfDay()));
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                LocalDate date = rs.getDate("sale_date").toLocalDate();
-                report.getSalesByDay().put(date, rs.getBigDecimal("daily_total"));
-            }
-        }
-    }
-
     return report;
   }
 }

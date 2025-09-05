@@ -82,7 +82,6 @@ public class ShiftsController {
                     ShiftReport summary = reportsService.getShiftReport(SessionManager.getCurrentShiftId());
                     showShiftSummaryDialog(summary);
 
-
                     showAlert(Alert.AlertType.INFORMATION, "Success", "Shift #" + SessionManager.getCurrentShiftId() + " has been ended.");
 
                     SessionManager.setCurrentShiftId(null);

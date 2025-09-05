@@ -1,6 +1,7 @@
 package com.yourcompany.cafeteria.service;
 
 import com.yourcompany.cafeteria.dao.UsersDAO;
+import com.yourcompany.cafeteria.model.Role;
 import com.yourcompany.cafeteria.model.User;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -25,7 +26,7 @@ public class UsersService {
         }
         String hashedPassword = BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
         user.setPasswordHash(hashedPassword);
-        return usersDAO.createUser(user.getUsername(), user.getPasswordHash(), user.getFullName(), user.getRoleId());
+        return usersDAO.createUser(user.getUsername(), user.getPasswordHash(), user.getFullName(), user.getRole().getId());
     }
 
     public User authenticate(String username, String plainTextPassword) throws SQLException {
@@ -55,5 +56,9 @@ public class UsersService {
         if (user != null) {
             usersDAO.updateUserStatus(userId, !user.isActive());
         }
+    }
+
+    public List<Role> getAllRoles() throws SQLException {
+        return usersDAO.getAllRoles();
     }
 }

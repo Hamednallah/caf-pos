@@ -5,7 +5,7 @@ public class User {
     private String username;
     private String passwordHash;
     private String fullName;
-    private Integer roleId;
+    private Role role;
     private boolean active = true;
 
     public Integer getId() {
@@ -40,12 +40,12 @@ public class User {
         this.fullName = fullName;
     }
 
-    public Integer getRoleId() {
-        return roleId;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public boolean isActive() {

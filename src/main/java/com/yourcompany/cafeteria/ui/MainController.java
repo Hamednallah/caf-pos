@@ -1,14 +1,16 @@
 package com.yourcompany.cafeteria.ui;
 
 import com.yourcompany.cafeteria.MainApp;
+import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 
 import java.io.IOException;
@@ -19,7 +21,7 @@ public class MainController implements ResourceAwareController {
 
     @FXML private StackPane mainContent;
     @FXML private ComboBox<Locale> languageComboBox;
-    @FXML private ToggleButton salesButton;
+    @FXML private ToggleButton dashboardButton;
     @FXML private ToggleButton usersButton;
     @FXML private Label currentUserLabel;
     @FXML private Label shiftStatusLabel;
@@ -40,10 +42,10 @@ public class MainController implements ResourceAwareController {
         setupLanguageComboBox();
         updateUserInfo();
 
-        // Select the sales view by default
-        if (salesButton != null) {
-            salesButton.setSelected(true);
-            handleSales(null);
+        // Select the dashboard view by default
+        if (dashboardButton != null) {
+            dashboardButton.setSelected(true);
+            handleDashboard(null);
         }
     }
 
@@ -51,7 +53,7 @@ public class MainController implements ResourceAwareController {
         // Apply role-based access control
         if (com.yourcompany.cafeteria.util.SessionManager.getCurrentUser() != null) {
             currentUserLabel.setText(com.yourcompany.cafeteria.util.SessionManager.getCurrentUser().getFullName());
-            if (com.yourcompany.cafeteria.util.SessionManager.getCurrentUser().getRoleId() == 1) { // ADMIN
+            if (com.yourcompany.cafeteria.util.SessionManager.getCurrentUser().getRole().getId() == 1) { // ADMIN
                 usersButton.setVisible(true);
                 usersButton.setManaged(true);
             } else {
@@ -111,6 +113,11 @@ public class MainController implements ResourceAwareController {
     }
 
     @FXML
+    private void handleDashboard(ActionEvent event) {
+        loadView("/com/yourcompany/cafeteria/fxml/DashboardView.fxml");
+    }
+
+    @FXML
     private void handleSales(ActionEvent event) {
         loadView("/com/yourcompany/cafeteria/fxml/SalesView.fxml");
     }
@@ -156,7 +163,14 @@ public class MainController implements ResourceAwareController {
                 ((ResourceAwareController) controller).setResources(resourceBundle);
             }
 
+            // Add a fade-in transition
+            view.setOpacity(0);
             mainContent.getChildren().setAll(view);
+            FadeTransition ft = new FadeTransition(Duration.millis(300), view);
+            ft.setFromValue(0.0);
+            ft.setToValue(1.0);
+            ft.play();
+
         } catch (IOException e) {
             System.err.println("Failed to load view: " + fxmlPath);
             e.printStackTrace();

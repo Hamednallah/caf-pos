@@ -1,5 +1,6 @@
 package com.yourcompany.cafeteria;
 
+import com.yourcompany.cafeteria.service.SettingsService;
 import com.yourcompany.cafeteria.ui.MainController;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
 import javafx.application.Application;
@@ -47,7 +48,7 @@ public class MainApp extends Application {
     private void loadApplication(Locale locale) throws IOException {
         ResourceBundle bundle = ResourceBundle.getBundle(BASE_BUNDLE_NAME, locale);
 
-        URL mainViewUrl = getClass().getResource("fxml/MainView.fxml");
+        URL mainViewUrl = getClass().getResource("/com/yourcompany/cafeteria/fxml/MainView.fxml");
         if (mainViewUrl == null) {
             System.err.println("Cannot find MainView.fxml. Please check the path.");
             return;
@@ -62,7 +63,22 @@ public class MainApp extends Application {
         controller.setResources(bundle);
 
         Scene scene = new Scene(root);
-        scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+
+        // Load and apply theme
+        try (var c = DataSourceProvider.getConnection()) {
+            SettingsService settingsService = new SettingsService(c);
+            String theme = settingsService.get("ui.theme");
+            if ("Dark".equalsIgnoreCase(theme)) {
+                scene.getStylesheets().add(getClass().getResource("/com/yourcompany/cafeteria/dark-theme.css").toExternalForm());
+            } else {
+                scene.getStylesheets().add(getClass().getResource("/com/yourcompany/cafeteria/application.css").toExternalForm());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Fallback to default stylesheet
+            scene.getStylesheets().add(getClass().getResource("/com/yourcompany/cafeteria/application.css").toExternalForm());
+        }
+
 
         // Handle Right-to-Left (RTL) layout
         if (isRTL(locale)) {

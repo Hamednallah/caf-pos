@@ -31,21 +31,4 @@ public class CategoryDAO {
         }
         return categories;
     }
-
-    public Category create(Category category) throws SQLException {
-        String sql = "INSERT INTO category (name, description) VALUES (?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, category.getName());
-            ps.setString(2, category.getDescription());
-            ps.executeUpdate();
-            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    category.setId(generatedKeys.getInt(1));
-                } else {
-                    throw new SQLException("Creating category failed, no ID obtained.");
-                }
-            }
-        }
-        return category;
-    }
 }

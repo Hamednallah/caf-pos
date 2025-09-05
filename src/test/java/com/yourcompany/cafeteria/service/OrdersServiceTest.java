@@ -55,13 +55,13 @@ class OrdersServiceTest {
         int itemId = itemsService.add(item);
 
         Order order = new Order();
-        order.setUserId(1);
-        order.setTotalAmount(new BigDecimal("10.00"));
+        order.cashierId = 1;
+        order.totalAmount = new BigDecimal("10.00");
         OrderItem orderItem = new OrderItem();
         orderItem.setItemId(itemId);
         orderItem.setQuantity(1);
         orderItem.setLineTotal(new BigDecimal("10.00"));
-        order.setItems(Collections.singletonList(orderItem));
+        order.items = Collections.singletonList(orderItem);
 
         int orderId = ordersService.create(order);
         assertTrue(orderId > 0);
@@ -72,8 +72,8 @@ class OrdersServiceTest {
         assertThrows(IllegalArgumentException.class, () -> ordersService.create(null));
 
         Order order1 = new Order();
-        order1.setItems(new ArrayList<>());
-        order1.setTotalAmount(new BigDecimal("10.00"));
+        order1.items = new ArrayList<>();
+        order1.totalAmount = new BigDecimal("10.00");
         assertThrows(IllegalArgumentException.class, () -> ordersService.create(order1));
 
         Item item = new Item();
@@ -87,8 +87,8 @@ class OrdersServiceTest {
         orderItem.setItemId(itemId);
         orderItem.setQuantity(1);
         orderItem.setLineTotal(new BigDecimal("10.00"));
-        order2.setItems(Collections.singletonList(orderItem));
-        order2.setTotalAmount(BigDecimal.ZERO);
+        order2.items = Collections.singletonList(orderItem);
+        order2.totalAmount = BigDecimal.ZERO;
         assertThrows(IllegalArgumentException.class, () -> ordersService.create(order2));
     }
 }

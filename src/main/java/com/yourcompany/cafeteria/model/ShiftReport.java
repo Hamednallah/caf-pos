@@ -1,14 +1,9 @@
 package com.yourcompany.cafeteria.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 public class ShiftReport {
 
-    private int shiftId;
-    private String cashierName;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
     private BigDecimal startingFloat;
     private BigDecimal totalSales;
     private BigDecimal totalDiscounts;
@@ -16,51 +11,8 @@ public class ShiftReport {
     private BigDecimal bankTotal;
     private long ordersCount;
     private BigDecimal totalExpenses;
-    private BigDecimal actualCash;
-    private BigDecimal difference;
 
-    // Calculated property
-    public BigDecimal getExpectedCash() {
-        BigDecimal start = startingFloat != null ? startingFloat : BigDecimal.ZERO;
-        BigDecimal cashIn = cashTotal != null ? cashTotal : BigDecimal.ZERO;
-        BigDecimal expense = totalExpenses != null ? totalExpenses : BigDecimal.ZERO;
-        return start.add(cashIn).subtract(expense);
-    }
-
-
-    // Standard Getters and Setters
-
-    public int getShiftId() {
-        return shiftId;
-    }
-
-    public void setShiftId(int shiftId) {
-        this.shiftId = shiftId;
-    }
-
-    public String getCashierName() {
-        return cashierName;
-    }
-
-    public void setCashierName(String cashierName) {
-        this.cashierName = cashierName;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
+    // Getters and Setters
 
     public BigDecimal getStartingFloat() {
         return startingFloat;
@@ -116,21 +68,5 @@ public class ShiftReport {
 
     public void setTotalExpenses(BigDecimal totalExpenses) {
         this.totalExpenses = totalExpenses;
-    }
-
-    public BigDecimal getActualCash() {
-        return actualCash;
-    }
-
-    public void setActualCash(BigDecimal actualCash) {
-        this.actualCash = actualCash;
-    }
-
-    public BigDecimal getDifference() {
-        return difference;
-    }
-
-    public void setDifference(BigDecimal difference) {
-        this.difference = difference;
     }
 }
