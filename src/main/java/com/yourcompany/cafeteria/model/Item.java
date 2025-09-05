@@ -3,19 +3,19 @@ package com.yourcompany.cafeteria.model;
 import java.math.BigDecimal;
 
 public class Item {
-    private Integer id;
+    private int id;
     private String name;
     private String description;
     private BigDecimal price;
     private Integer categoryId;
     private String imagePath;
-    private Category category;
+    private Category category; // The associated Category object
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -65,5 +65,8 @@ public class Item {
 
     public void setCategory(Category category) {
         this.category = category;
+        if (category != null) {
+            this.categoryId = category.getId();
+        }
     }
 }

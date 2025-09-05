@@ -40,7 +40,7 @@ public class ExpenseService {
         expense.setAmount(amount);
         expense.setDescription(description);
         expense.setCategory(category);
-        expense.setRecordedBy(recordedBy);
+        expense.setUserId(recordedBy);
         expense.setShiftId(shiftId);
         
         return dao.insert(expense);

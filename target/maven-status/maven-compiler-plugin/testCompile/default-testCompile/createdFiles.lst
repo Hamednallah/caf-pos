@@ -9,7 +9,6 @@ com/yourcompany/cafeteria/service/OrdersServiceTest.class
 com/yourcompany/cafeteria/dao/ExpensesDAOTest.class
 com/yourcompany/cafeteria/dao/ShiftsDAOTest.class
 com/yourcompany/cafeteria/dao/SettingsDAOTest.class
-com/yourcompany/cafeteria/service/ReturnsServiceTest.class
 com/yourcompany/cafeteria/service/ExpenseServiceTest.class
 com/yourcompany/cafeteria/ui/SettingsViewTest.class
 com/yourcompany/cafeteria/service/ShiftServiceTest.class

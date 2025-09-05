@@ -67,34 +67,35 @@ public class OrderFlowIntegrationTest {
 
         // 3. Create an order
         Order order = new Order();
-        order.cashierId = cashierId;
-        order.shiftId = shiftId;
-        order.status = "FINALIZED";
-        order.paymentMethod = "CASH";
-        order.paymentConfirmed = true;
+        order.setUserId(cashierId);
+        order.setShiftId(shiftId);
+        order.setStatus("FINALIZED");
+        order.setPaymentMethod("CASH");
+        order.setPaymentConfirmed(true);
 
         OrderItem coffeeItem = new OrderItem();
         coffeeItem.setItemId(coffeeId);
         coffeeItem.setQuantity(2);
-        coffeeItem.setLineTotal(testCoffee.getPrice().multiply(new BigDecimal("2")));
+        coffeeItem.setPriceAtPurchase(testCoffee.getPrice()); // Price at time of sale
 
-        order.items = Collections.singletonList(coffeeItem);
-        order.totalAmount = coffeeItem.getLineTotal();
-        order.discountAmount = BigDecimal.ZERO;
+        order.setItems(Collections.singletonList(coffeeItem));
+        order.setTotalAmount(coffeeItem.getLineTotal());
+        order.setDiscountAmount(BigDecimal.ZERO);
 
         ordersService.create(order);
 
         // 4. Record an expense
         Expense expense = new Expense();
         expense.setShiftId(shiftId);
-        expense.setRecordedBy(cashierId);
+        expense.setUserId(cashierId);
         expense.setDescription("Cleaning Supplies");
         expense.setAmount(new BigDecimal("15.00"));
         expenseService.recordExpense(expense);
 
         // 5. End the shift and get the summary
         ShiftSummary summary = reportsService.getShiftSummary(shiftId);
-        shiftService.endShift(shiftId);
+        BigDecimal expectedCash = summary.getExpectedCashInDrawer();
+        shiftService.endShift(shiftId, expectedCash);
 
         // 6. Assertions
         assertEquals(0, new BigDecimal("100.00").compareTo(summary.getStartingFloat()), "Starting float should be 100.00");
@@ -102,7 +103,6 @@ public class OrderFlowIntegrationTest {
         assertEquals(0, new BigDecimal("15.00").compareTo(summary.getTotalExpenses()), "Total expenses should be 15.00");
 
         // Expected cash = 100.00 (start) + 5.00 (sales) - 15.00 (expenses) = 90.00
-        BigDecimal expectedCash = new BigDecimal("90.00");
-        assertEquals(0, expectedCash.compareTo(summary.getExpectedCashInDrawer()), "Expected cash in drawer should be 90.00");
+        assertEquals(0, expectedCash.compareTo(new BigDecimal("90.00")), "Expected cash in drawer should be 90.00");
     }
 }

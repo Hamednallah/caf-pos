@@ -1,6 +1,6 @@
 package com.yourcompany.cafeteria.ui;
 
-import com.yourcompany.cafeteria.model.ShiftSummary;
+import com.yourcompany.cafeteria.model.ShiftReport;
 import com.yourcompany.cafeteria.service.ReportsService;
 import com.yourcompany.cafeteria.service.ShiftService;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
@@ -72,26 +72,51 @@ public class ShiftsController {
         confirmation.setContentText("This will generate a final report for Shift #" + SessionManager.getCurrentShiftId());
 
         confirmation.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
-            try (var c = DataSourceProvider.getConnection()) {
-                ReportsService reportsService = new ReportsService(c);
-                ShiftSummary summary = reportsService.getShiftSummary(SessionManager.getCurrentShiftId());
+            promptForActualCash().ifPresent(actualCash -> {
+                try (var c = DataSourceProvider.getConnection()) {
+                    ShiftService shiftService = new ShiftService(c);
+                    shiftService.endShift(SessionManager.getCurrentShiftId(), actualCash);
 
-                showShiftSummaryDialog(summary);
+                    // Show final report
+                    ReportsService reportsService = new ReportsService(c);
+                    ShiftReport summary = reportsService.getShiftReport(SessionManager.getCurrentShiftId());
+                    showShiftSummaryDialog(summary);
 
-                ShiftService shiftService = new ShiftService(c);
-                shiftService.endShift(SessionManager.getCurrentShiftId());
 
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Shift #" + SessionManager.getCurrentShiftId() + " has been ended.");
+                    showAlert(Alert.AlertType.INFORMATION, "Success", "Shift #" + SessionManager.getCurrentShiftId() + " has been ended.");
 
-                SessionManager.setCurrentShiftId(null);
-                updateUIState();
-            } catch (Exception e) {
-                showError("Failed to End Shift", "Could not generate summary or end the shift.", e.getMessage());
-            }
+                    SessionManager.setCurrentShiftId(null);
+                    updateUIState();
+                } catch (Exception e) {
+                    showError("Failed to End Shift", "Could not end the shift.", e.getMessage());
+                }
+            });
         });
     }
 
-    private void showShiftSummaryDialog(ShiftSummary summary) {
+    private Optional<BigDecimal> promptForActualCash() {
+        TextInputDialog dialog = new TextInputDialog("0.00");
+        dialog.setTitle("End Shift");
+        dialog.setHeaderText("Enter Final Cash Amount");
+        dialog.setContentText("Please enter the final amount of cash in the drawer:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            try {
+                BigDecimal actualCash = new BigDecimal(result.get());
+                if (actualCash.compareTo(BigDecimal.ZERO) < 0) {
+                    showError("Invalid Input", "Actual cash cannot be negative.", "");
+                    return Optional.empty();
+                }
+                return Optional.of(actualCash);
+            } catch (NumberFormatException e) {
+                showError("Invalid Input", "Please enter a valid number for the actual cash.", "");
+            }
+        }
+        return Optional.empty();
+    }
+
+    private void showShiftSummaryDialog(ShiftReport summary) {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
         dialog.setTitle("Shift Summary Report");
         dialog.setHeaderText("Summary for Shift #" + SessionManager.getCurrentShiftId());
@@ -104,13 +129,11 @@ public class ShiftsController {
         grid.add(new Label("Starting Float:"), 0, 0);
         grid.add(new Label(String.format("%.2f", summary.getStartingFloat())), 1, 0);
         grid.add(new Label("Total Cash Sales:"), 0, 1);
-        grid.add(new Label(String.format("%.2f", summary.getTotalCashSales())), 1, 1);
+        grid.add(new Label(String.format("%.2f", summary.getCashTotal())), 1, 1);
         grid.add(new Label("Total Bank Sales:"), 0, 2);
-        grid.add(new Label(String.format("%.2f", summary.getTotalBankSales())), 1, 2);
+        grid.add(new Label(String.format("%.2f", summary.getBankTotal())), 1, 2);
         grid.add(new Label("Total Expenses:"), 0, 3);
         grid.add(new Label(String.format("- %.2f", summary.getTotalExpenses())), 1, 3);
-        grid.add(new Label("Expected Cash:"), 0, 4);
-        grid.add(new Label(String.format("%.2f", summary.getExpectedCashInDrawer())), 1, 4);
 
         dialog.getDialogPane().setContent(grid);
         dialog.showAndWait();

@@ -58,13 +58,13 @@ class ReportsServiceTest {
         item.setPrice(new BigDecimal("12.00"));
         int itemId = itemsService.add(item);
         Order order = new Order();
-        order.cashierId = 1;
-        order.totalAmount = new BigDecimal("12.00");
+        order.setUserId(1);
+        order.setTotalAmount(new BigDecimal("12.00"));
         OrderItem orderItem = new OrderItem();
         orderItem.setItemId(itemId);
         orderItem.setQuantity(1);
         orderItem.setLineTotal(new BigDecimal("12.00"));
-        order.items = Collections.singletonList(orderItem);
+        order.setItems(Collections.singletonList(orderItem));
         ordersService.create(order);
 
         // When

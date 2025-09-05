@@ -2,7 +2,7 @@ package com.yourcompany.cafeteria.ui;
 
 import com.yourcompany.cafeteria.model.DateRangeReport;
 import com.yourcompany.cafeteria.model.Shift;
-import com.yourcompany.cafeteria.model.ShiftSummary;
+import com.yourcompany.cafeteria.model.ShiftReport;
 import com.yourcompany.cafeteria.service.ReportsService;
 import com.yourcompany.cafeteria.service.ShiftService;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
@@ -12,11 +12,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
+import javafx.util.StringConverter;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -24,8 +25,8 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 public class ReportsController implements ResourceAwareController {
@@ -33,31 +34,41 @@ public class ReportsController implements ResourceAwareController {
     // Common Services
     private ReportsService reportsService;
     private ShiftService shiftService;
-    private ResourceBundle resources;
 
-    // Daily Sales Tab
-    @FXML private DatePicker dailySalesReportDatePicker;
-    @FXML private TableView<DailySalesReportItem> dailySalesReportTable;
-    @FXML private TableColumn<DailySalesReportItem, String> itemNameColumn;
-    @FXML private TableColumn<DailySalesReportItem, Integer> quantitySoldColumn;
-    @FXML private TableColumn<DailySalesReportItem, BigDecimal> totalSalesColumn;
-    @FXML private Button exportDailySalesButton;
-    private ObservableList<DailySalesReportItem> dailyReportData = FXCollections.observableArrayList();
+    // Tab: Daily Sales
+    @FXML private DatePicker dailyDatePicker;
+    @FXML private TableView<DailySale> dailySalesTable;
+    @FXML private TableColumn<DailySale, String> dailyItemNameCol;
+    @FXML private TableColumn<DailySale, Integer> dailyQuantityCol;
+    @FXML private TableColumn<DailySale, BigDecimal> dailyTotalCol;
 
-    // Date Range Tab
-    @FXML private DatePicker dateRangeStartDatePicker;
-    @FXML private DatePicker dateRangeEndDatePicker;
+    // Tab: Date Range Report
+    @FXML private DatePicker fromDatePicker;
+    @FXML private DatePicker toDatePicker;
     @FXML private Label totalSalesLabel;
     @FXML private Label totalOrdersLabel;
-    @FXML private javafx.scene.chart.BarChart<String, Number> salesChart;
+    @FXML private BarChart<String, Number> salesBarChart;
 
-    // Shift Reports Tab
-    @FXML private ComboBox<Shift> shiftSelectorComboBox;
-    @FXML private GridPane shiftReportGrid;
+    // Tab: Shift Reports
+    @FXML private ComboBox<Shift> shiftComboBox;
+    @FXML private Label shiftIdLabel;
+    @FXML private Label cashierLabel;
+    @FXML private Label startTimeLabel;
+    @FXML private Label endTimeLabel;
+    @FXML private Label startingFloatLabel;
+    @FXML private Label shiftTotalSalesLabel;
+    @FXML private Label totalExpensesLabel;
+    @FXML private Label expectedCashLabel;
+    @FXML private Label actualCashLabel;
+    @FXML private Label differenceLabel;
+
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private ResourceBundle resourceBundle;
 
     @Override
-    public void setResources(ResourceBundle resources) {
-        this.resources = resources;
+    public void setResources(ResourceBundle resourceBundle) {
+        this.resourceBundle = resourceBundle;
+        // The UI is already set by the FXML loader, but we could update dynamic text here if needed.
     }
 
     @FXML
@@ -69,150 +80,159 @@ public class ReportsController implements ResourceAwareController {
             setupDailySalesTab();
             setupDateRangeTab();
             setupShiftReportsTab();
+
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Initialization Error", "Could not initialize the reports view.");
+            showAlert(Alert.AlertType.ERROR, "Initialization Failed", "Could not initialize reports view: " + e.getMessage());
         }
     }
 
-    @FXML
-    private void handleExportDailySales() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(resources.getString("export.csv.title"));
-        String initialFileName = String.format(resources.getString("export.csv.daily.filename"), dailySalesReportDatePicker.getValue());
-        fileChooser.setInitialFileName(initialFileName);
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(resources.getString("files.csv"), "*.csv"));
-        File file = fileChooser.showSaveDialog(dailySalesReportTable.getScene().getWindow());
-
-        if (file != null) {
-            try (PrintWriter writer = new PrintWriter(file)) {
-                writer.println("Item Name,Quantity Sold,Total Sales");
-                for (DailySalesReportItem item : dailyReportData) {
-                    writer.printf("\"%s\",%d,%.2f%n",
-                            item.getName().replace("\"", "\"\""),
-                            item.getQuantity(),
-                            item.getTotalSales()
-                    );
-                }
-                showAlert(Alert.AlertType.INFORMATION, "Export Successful", String.format(resources.getString("export.csv.success"), file.getAbsolutePath()));
-            } catch (Exception e) {
-                showError("Export Failed", String.format(resources.getString("export.csv.fail"), e.getMessage()));
-            }
-        }
-    }
-
-    // --- Daily Sales Tab Implementation ---
+    // =================================================================
+    // Daily Sales Tab Logic
+    // =================================================================
     private void setupDailySalesTab() {
-        dailySalesReportTable.setItems(dailyReportData);
-        itemNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        quantitySoldColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        totalSalesColumn.setCellValueFactory(new PropertyValueFactory<>("totalSales"));
+        dailyItemNameCol.setCellValueFactory(new PropertyValueFactory<>("itemName"));
+        dailyQuantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        dailyTotalCol.setCellValueFactory(new PropertyValueFactory<>("totalSales"));
 
-        dailySalesReportDatePicker.setValue(LocalDate.now());
-        handleGenerateDailyReport(); // Load initial report for today
-
-        dailySalesReportDatePicker.valueProperty().addListener((obs, oldDate, newDate) -> {
-            if (newDate != null) {
-                handleGenerateDailyReport();
-            }
-        });
+        dailyDatePicker.setValue(LocalDate.now());
+        dailyDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> loadDailySalesReport());
+        loadDailySalesReport();
     }
 
-    private void handleGenerateDailyReport() {
-        LocalDate selectedDate = dailySalesReportDatePicker.getValue();
+    private void loadDailySalesReport() {
+        LocalDate selectedDate = dailyDatePicker.getValue();
         if (selectedDate == null) return;
 
-        dailyReportData.clear();
-        try {
-            ResultSet rs = reportsService.getDailySales(selectedDate);
+        ObservableList<DailySale> sales = FXCollections.observableArrayList();
+        try (ResultSet rs = reportsService.getDailySales(selectedDate)) {
             while (rs.next()) {
-                dailyReportData.add(new DailySalesReportItem(
+                sales.add(new DailySale(
                         rs.getString("name"),
                         rs.getInt("qty"),
                         rs.getBigDecimal("sales")
                 ));
             }
+            dailySalesTable.setItems(sales);
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Report Error", resources.getString("error.report.daily"));
+            showAlert(Alert.AlertType.ERROR, "Load Error", "Failed to load daily sales report.");
         }
     }
 
-    // --- Date Range Tab Implementation ---
+    @FXML
+    private void handleExportCsv() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Daily Sales Report");
+        fileChooser.setInitialFileName("daily_sales_" + dailyDatePicker.getValue() + ".csv");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File file = fileChooser.showSaveDialog(dailySalesTable.getScene().getWindow());
+
+        if (file != null) {
+            try (PrintWriter writer = new PrintWriter(file)) {
+                writer.println("Item Name,Quantity Sold,Total Sales");
+                for (DailySale item : dailySalesTable.getItems()) {
+                    writer.printf("\"%s\",%d,%.2f%n", item.getItemName().replace("\"", "\"\""), item.getQuantity(), item.getTotalSales());
+                }
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Report exported successfully.");
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Export Failed", "Could not save the report: " + e.getMessage());
+            }
+        }
+    }
+
+
+    // =================================================================
+    // Date Range Tab Logic
+    // =================================================================
     private void setupDateRangeTab() {
-        dateRangeStartDatePicker.setValue(LocalDate.now().withDayOfMonth(1));
-        dateRangeEndDatePicker.setValue(LocalDate.now());
+        fromDatePicker.setValue(LocalDate.now().withDayOfMonth(1));
+        toDatePicker.setValue(LocalDate.now());
     }
 
     @FXML
     private void handleGenerateDateRangeReport() {
-        LocalDate startDate = dateRangeStartDatePicker.getValue();
-        LocalDate endDate = dateRangeEndDatePicker.getValue();
+        LocalDate from = fromDatePicker.getValue();
+        LocalDate to = toDatePicker.getValue();
 
-        if (startDate == null || endDate == null || startDate.isAfter(endDate)) {
-            showAlert(Alert.AlertType.WARNING, "Invalid Date Range", "Please select a valid start and end date.");
+        if (from == null || to == null || from.isAfter(to)) {
+            showAlert(Alert.AlertType.WARNING, "Invalid Date Range", "Please select a valid 'from' and 'to' date.");
             return;
         }
 
         try {
-            DateRangeReport report = reportsService.getDateRangeReport(startDate, endDate);
-            totalSalesLabel.setText(String.format("%.2f", report.getTotalSales()));
+            DateRangeReport report = reportsService.getDateRangeReport(from, to);
+            totalSalesLabel.setText(String.format("$%.2f", report.getTotalSales()));
             totalOrdersLabel.setText(String.valueOf(report.getOrdersCount()));
 
-            // Populate the chart
-            Map<LocalDate, BigDecimal> salesByDay = reportsService.getSalesByDay(startDate, endDate);
             XYChart.Series<String, Number> series = new XYChart.Series<>();
-            series.setName("Daily Sales");
-            for (Map.Entry<LocalDate, BigDecimal> entry : salesByDay.entrySet()) {
-                series.getData().add(new XYChart.Data<>(entry.getKey().toString(), entry.getValue()));
-            }
-            salesChart.getData().setAll(series);
+            series.setName("Sales");
+            report.getSalesByDay().forEach((date, total) -> {
+                series.getData().add(new XYChart.Data<>(date.toString(), total));
+            });
+            salesBarChart.getData().clear();
+            salesBarChart.getData().add(series);
 
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Report Error", resources.getString("error.report.dateRange"));
+            showAlert(Alert.AlertType.ERROR, "Report Error", "Failed to generate date range report.");
         }
     }
 
-    // --- Shift Reports Tab Implementation ---
+
+    // =================================================================
+    // Shift Reports Tab Logic
+    // =================================================================
     private void setupShiftReportsTab() throws Exception {
-        loadShiftsIntoComboBox();
-        shiftSelectorComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldShift, newShift) -> {
-            if (newShift != null) {
-                displayShiftSummary(newShift);
+        List<Shift> shifts = shiftService.getAllShifts();
+        shiftComboBox.setItems(FXCollections.observableArrayList(shifts));
+
+        shiftComboBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Shift shift) {
+                if (shift == null) return null;
+                return String.format("ID: %d (%s)", shift.getId(), shift.getStartTime().format(dateTimeFormatter));
+            }
+
+            @Override
+            public Shift fromString(String string) {
+                return null; // Not needed
+            }
+        });
+
+        shiftComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                loadShiftReport(newVal.getId());
             }
         });
     }
 
-    private void loadShiftsIntoComboBox() throws Exception {
-        List<Shift> shifts = shiftService.getAllShifts();
-        shiftSelectorComboBox.setItems(FXCollections.observableArrayList(shifts));
-    }
-
-    private void displayShiftSummary(Shift shift) {
-        shiftReportGrid.getChildren().clear(); // Clear previous summary
+    private void loadShiftReport(int shiftId) {
         try {
-            ShiftSummary summary = reportsService.getShiftSummary(shift.getId());
+            ShiftReport report = reportsService.getShiftReport(shiftId);
+            shiftIdLabel.setText(String.valueOf(report.getShiftId()));
+            cashierLabel.setText(report.getCashierName());
+            startTimeLabel.setText(report.getStartTime() != null ? report.getStartTime().format(dateTimeFormatter) : "-");
+            endTimeLabel.setText(report.getEndTime() != null ? report.getEndTime().format(dateTimeFormatter) : "-");
+            startingFloatLabel.setText(String.format("$%.2f", report.getStartingFloat()));
+            shiftTotalSalesLabel.setText(String.format("$%.2f", report.getTotalSales()));
+            totalExpensesLabel.setText(String.format("$%.2f", report.getTotalExpenses()));
+            expectedCashLabel.setText(String.format("$%.2f", report.getExpectedCash()));
 
-            shiftReportGrid.add(new Label("Starting Float:"), 0, 0);
-            shiftReportGrid.add(new Label(String.format("%.2f", summary.getStartingFloat())), 1, 0);
-            shiftReportGrid.add(new Label("Total Cash Sales:"), 0, 1);
-            shiftReportGrid.add(new Label(String.format("%.2f", summary.getTotalCashSales())), 1, 1);
-            shiftReportGrid.add(new Label("Total Bank Sales:"), 0, 2);
-            shiftReportGrid.add(new Label(String.format("%.2f", summary.getTotalBankSales())), 1, 2);
-            shiftReportGrid.add(new Label("Total Expenses:"), 0, 3);
-            shiftReportGrid.add(new Label(String.format("- %.2f", summary.getTotalExpenses())), 1, 3);
-            shiftReportGrid.add(new Label("Expected Cash:"), 0, 4);
-            shiftReportGrid.add(new Label(String.format("%.2f", summary.getExpectedCashInDrawer())), 1, 4);
+            // These might be null if the shift is not ended
+            actualCashLabel.setText(report.getActualCash() != null ? String.format("$%.2f", report.getActualCash()) : "-");
+            differenceLabel.setText(report.getDifference() != null ? String.format("$%.2f", report.getDifference()) : "-");
 
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Shift Summary Error", resources.getString("error.shift.summary"));
+            showAlert(Alert.AlertType.ERROR, "Load Error", "Failed to load shift report.");
         }
     }
 
 
-    // --- Utility Methods ---
+    // =================================================================
+    // Helper Methods
+    // =================================================================
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
@@ -221,27 +241,21 @@ public class ReportsController implements ResourceAwareController {
         alert.showAndWait();
     }
 
-    private void showError(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
-
-    // --- Inner Class for Daily Sales Table ---
-    public static class DailySalesReportItem {
-        private final SimpleStringProperty name;
+    // =================================================================
+    // Inner class for Daily Sales Table
+    // =================================================================
+    public static class DailySale {
+        private final SimpleStringProperty itemName;
         private final SimpleIntegerProperty quantity;
         private final SimpleObjectProperty<BigDecimal> totalSales;
 
-        public DailySalesReportItem(String name, int quantity, BigDecimal totalSales) {
-            this.name = new SimpleStringProperty(name);
+        public DailySale(String itemName, int quantity, BigDecimal totalSales) {
+            this.itemName = new SimpleStringProperty(itemName);
             this.quantity = new SimpleIntegerProperty(quantity);
             this.totalSales = new SimpleObjectProperty<>(totalSales);
         }
 
-        public String getName() { return name.get(); }
+        public String getItemName() { return itemName.get(); }
         public int getQuantity() { return quantity.get(); }
         public BigDecimal getTotalSales() { return totalSales.get(); }
     }

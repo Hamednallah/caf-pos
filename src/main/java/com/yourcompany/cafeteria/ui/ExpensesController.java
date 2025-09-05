@@ -65,7 +65,7 @@ public class ExpensesController {
                 expense.setAmount(rs.getBigDecimal("amount"));
                 expense.setRecordedAt(rs.getTimestamp("recorded_at").toLocalDateTime());
                 expense.setShiftId(rs.getInt("shift_id"));
-                expense.setRecordedBy(rs.getInt("recorded_by"));
+                expense.setUserId(rs.getInt("user_id"));
                 expenseList.add(expense);
             }
         } catch (Exception e) {
@@ -84,7 +84,7 @@ public class ExpensesController {
             newExpense.setAmount(amount);
             newExpense.setShiftId(SessionManager.getCurrentShiftId());
             if (SessionManager.getCurrentUser() != null) {
-                newExpense.setRecordedBy(SessionManager.getCurrentUser().getId());
+                newExpense.setUserId(SessionManager.getCurrentUser().getId());
             }
             newExpense.setRecordedAt(LocalDateTime.now());
 

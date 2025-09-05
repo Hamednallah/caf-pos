@@ -1,71 +1,57 @@
 package com.yourcompany.cafeteria.ui;
 
-import com.yourcompany.cafeteria.service.StartupService;
-import com.yourcompany.cafeteria.util.DataSourceProvider;
-import com.yourcompany.cafeteria.util.SessionManager;
+import com.yourcompany.cafeteria.MainApp;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.StackPane;
+import javafx.util.StringConverter;
 
 import java.io.IOException;
-import java.net.URL;
-import java.sql.SQLException;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class MainController implements ResourceAwareController {
 
-    private ResourceBundle resources;
+    @FXML private StackPane mainContent;
+    @FXML private ComboBox<Locale> languageComboBox;
+    @FXML private ToggleButton salesButton;
+    @FXML private ToggleButton usersButton;
+    @FXML private Label currentUserLabel;
+    @FXML private Label shiftStatusLabel;
 
-    @FXML
-    private BorderPane contentPane;
-    @FXML
-    private Button usersButton;
-    @FXML
-    private Label shiftStatusLabel;
-    @FXML
-    private Label currentUserLabel;
-
-    public void setResources(ResourceBundle resources) {
-        this.resources = resources;
-        updateLabels();
-    }
-
-    private void updateLabels() {
-        if (SessionManager.getCurrentUser() != null) {
-            currentUserLabel.setText(resources.getString("main.label.currentUser") + " " + SessionManager.getCurrentUser().getFullName());
-        } else {
-            currentUserLabel.setText(resources.getString("main.label.notLoggedIn"));
-        }
-
-        if (SessionManager.isShiftActive()) {
-            shiftStatusLabel.setText(String.format(resources.getString("main.shift.active"), SessionManager.getCurrentShiftId()));
-        } else {
-            shiftStatusLabel.setText(resources.getString("main.shift.none"));
-        }
-    }
-
-    @FXML
-    private void showReturnsView() {
-        loadView("/fxml/ReturnsView.fxml");
-    }
+    private ResourceBundle resourceBundle;
+    private MainApp mainApp;
 
     @FXML
     public void initialize() {
         // Perform startup checks before loading any views
-        try (var c = DataSourceProvider.getConnection()) {
-            StartupService startupService = new StartupService(c);
+        try (var c = com.yourcompany.cafeteria.util.DataSourceProvider.getConnection()) {
+            com.yourcompany.cafeteria.service.StartupService startupService = new com.yourcompany.cafeteria.service.StartupService(c);
             startupService.checkAndResumeActiveShift();
-        } catch (SQLException e) {
+        } catch (java.sql.SQLException e) {
             e.printStackTrace();
-            // In a real app, you would show a fatal error dialog and possibly exit.
         }
 
+        setupLanguageComboBox();
+        updateUserInfo();
+
+        // Select the sales view by default
+        if (salesButton != null) {
+            salesButton.setSelected(true);
+            handleSales(null);
+        }
+    }
+
+    public void updateUserInfo() {
         // Apply role-based access control
-        if (SessionManager.getCurrentUser() != null) {
-            if (SessionManager.getCurrentUser().getRoleId() == 1) { // ADMIN
+        if (com.yourcompany.cafeteria.util.SessionManager.getCurrentUser() != null) {
+            currentUserLabel.setText(com.yourcompany.cafeteria.util.SessionManager.getCurrentUser().getFullName());
+            if (com.yourcompany.cafeteria.util.SessionManager.getCurrentUser().getRoleId() == 1) { // ADMIN
                 usersButton.setVisible(true);
                 usersButton.setManaged(true);
             } else {
@@ -73,63 +59,106 @@ public class MainController implements ResourceAwareController {
                 usersButton.setManaged(false);
             }
         } else {
+            currentUserLabel.setText("Not Logged In");
             usersButton.setVisible(false);
             usersButton.setManaged(false);
         }
 
-        // Load the default view on startup
-        showSalesView();
+        // Update shift status
+        if (com.yourcompany.cafeteria.util.SessionManager.isShiftActive()) {
+            shiftStatusLabel.setText("Shift #" + com.yourcompany.cafeteria.util.SessionManager.getCurrentShiftId() + " Active");
+        } else {
+            shiftStatusLabel.setText("Shift: Inactive");
+        }
+    }
+
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp = mainApp;
+    }
+
+    @Override
+    public void setResources(ResourceBundle resourceBundle) {
+        this.resourceBundle = resourceBundle;
+    }
+
+    private void setupLanguageComboBox() {
+        languageComboBox.getItems().addAll(new Locale("en", "US"), new Locale("ar", "SA"));
+        languageComboBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Locale locale) {
+                return locale.getDisplayLanguage(locale);
+            }
+
+            @Override
+            public Locale fromString(String string) {
+                return null; // Not needed
+            }
+        });
+
+        // Set initial value based on current locale
+        if (Locale.getDefault().getLanguage().equals("ar")) {
+            languageComboBox.setValue(new Locale("ar", "SA"));
+        } else {
+            languageComboBox.setValue(new Locale("en", "US"));
+        }
+
+
+        languageComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !newVal.equals(oldVal)) {
+                mainApp.switchLanguage(newVal);
+            }
+        });
     }
 
     @FXML
-    private void showSalesView() {
-        loadView("/fxml/SalesView.fxml");
+    private void handleSales(ActionEvent event) {
+        loadView("/com/yourcompany/cafeteria/fxml/SalesView.fxml");
     }
 
     @FXML
-    private void showItemsView() {
-        loadView("/fxml/ItemsView.fxml");
+    private void handleItems(ActionEvent event) {
+        loadView("/com/yourcompany/cafeteria/fxml/ItemsView.fxml");
     }
 
     @FXML
-    private void showShiftsView() {
-        loadView("/fxml/ShiftsView.fxml");
+    private void handleReports(ActionEvent event) {
+        loadView("/com/yourcompany/cafeteria/fxml/ReportsView.fxml");
     }
 
     @FXML
-    private void showExpensesView() {
-        loadView("/fxml/ExpensesView.fxml");
+    private void handleShifts(ActionEvent event) {
+        loadView("/com/yourcompany/cafeteria/fxml/ShiftsView.fxml");
     }
 
     @FXML
-    private void showReportsView() {
-        loadView("/fxml/ReportsView.fxml");
+    private void handleExpenses(ActionEvent event) {
+        loadView("/com/yourcompany/cafeteria/fxml/ExpensesView.fxml");
     }
 
     @FXML
-    private void showUsersView() {
-        loadView("/fxml/UsersView.fxml");
+    private void handleUsers(ActionEvent event) {
+        loadView("/com/yourcompany/cafeteria/fxml/UsersView.fxml");
     }
 
     @FXML
-    private void showSettingsView() {
-        loadView("/fxml/SettingsView.fxml");
+    private void handleSettings(ActionEvent event) {
+        loadView("/com/yourcompany/cafeteria/fxml/SettingsView.fxml");
     }
+
 
     private void loadView(String fxmlPath) {
         try {
-            URL url = getClass().getResource(fxmlPath);
-            if (url == null) {
-                throw new IOException("Cannot find FXML file: " + fxmlPath);
-            }
-            FXMLLoader loader = new FXMLLoader(url, resources);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath), resourceBundle);
             Parent view = loader.load();
+
             Object controller = loader.getController();
             if (controller instanceof ResourceAwareController) {
-                ((ResourceAwareController) controller).setResources(resources);
+                ((ResourceAwareController) controller).setResources(resourceBundle);
             }
-            contentPane.setCenter(view);
+
+            mainContent.getChildren().setAll(view);
         } catch (IOException e) {
+            System.err.println("Failed to load view: " + fxmlPath);
             e.printStackTrace();
             // In a real app, show an error alert
         }

@@ -21,11 +21,11 @@ public class StartupService {
 
         try {
             ShiftService shiftService = new ShiftService(this.connection);
-            Integer cashierId = SessionManager.getCurrentUser().getId();
-            if (cashierId != null) {
-                ResultSet rs = shiftService.getActiveShiftForCashier(cashierId);
-                if (rs.next()) {
-                    SessionManager.setCurrentShiftId(rs.getInt("id"));
+            Integer userId = SessionManager.getCurrentUser().getId();
+            if (userId != null) {
+                com.yourcompany.cafeteria.model.Shift activeShift = shiftService.getActiveShiftForUser(userId);
+                if (activeShift != null) {
+                    SessionManager.setCurrentShiftId(activeShift.getId());
                 }
             }
         } catch (Exception e) {

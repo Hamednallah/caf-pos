@@ -11,7 +11,7 @@
             <children>
                 <Label text="Categories" styleClass="h2" />
                 <ListView fx:id="categoryListView" prefHeight="200.0" />
-                <TextField fx:id="searchField" promptText="Search items..." accessibleText="Search for items by name" />
+                <TextField fx:id="searchField" promptText="Search items..." />
             </children>
         </VBox>
     </left>
@@ -33,10 +33,6 @@
                         <TableColumn fx:id="cartPriceCol" prefWidth="75.0" text="Total" />
                     </columns>
                 </TableView>
-                <HBox spacing="5" alignment="CENTER_LEFT">
-                    <Button fx:id="removeButton" onAction="#handleRemoveItem" text="Remove Selected" />
-                    <Button fx:id="changeQuantityButton" onAction="#handleChangeQuantity" text="Change Quantity" />
-                </HBox>
                 <HBox alignment="CENTER_LEFT" spacing="5">
                     <children>
                         <Label text="Discount:" />

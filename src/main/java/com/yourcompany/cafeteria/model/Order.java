@@ -5,17 +5,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class Order {
-    public Integer id;
-    public Integer cashierId;
-    public Integer shiftId;
-    public LocalDateTime createdAt;
-    public BigDecimal totalAmount;
-    public BigDecimal discountAmount;
-    public String status;
-    public String paymentMethod;
-    public boolean paymentConfirmed;
-    public List<OrderItem> items;
+    private Integer id;
+    private Integer userId;
+    private Integer shiftId;
+    private LocalDateTime createdAt;
+    private BigDecimal totalAmount;
+    private BigDecimal discountAmount;
+    private String status;
+    private String paymentMethod;
+    private boolean paymentConfirmed;
+    private List<OrderItem> items;
 
+    // Getters and Setters
     public Integer getId() {
         return id;
     }
@@ -24,12 +25,12 @@ public class Order {
         this.id = id;
     }
 
-    public Integer getCashierId() {
-        return cashierId;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setCashierId(Integer cashierId) {
-        this.cashierId = cashierId;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public Integer getShiftId() {

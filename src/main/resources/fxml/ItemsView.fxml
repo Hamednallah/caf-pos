@@ -3,42 +3,25 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.TilePane?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.ItemsController">
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yourcompany.cafeteria.ui.ItemsController">
     <top>
-        <Label styleClass="view-title" text="%items.title" BorderPane.alignment="CENTER_LEFT">
-            <BorderPane.margin>
-                <Insets bottom="10" left="10" right="10" top="10" />
-            </BorderPane.margin>
-        </Label>
+        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10;">
+            <children>
+                <Label text="Manage Items" styleClass="h1" />
+                <Button onAction="#handleAddItem" text="Add New Item" />
+            </children>
+        </HBox>
     </top>
     <center>
-        <TableView fx:id="itemsTable" BorderPane.alignment="CENTER">
-            <columns>
-                <TableColumn fx:id="idColumn" prefWidth="75.0" text="%items.table.id" />
-                <TableColumn fx:id="nameColumn" prefWidth="200.0" text="%items.table.name" />
-                <TableColumn fx:id="priceColumn" prefWidth="100.0" text="%items.table.price" />
-                <TableColumn fx:id="categoryColumn" prefWidth="150.0" text="%items.table.category" />
-            </columns>
-            <BorderPane.margin>
-                <Insets bottom="10" left="10" right="10" top="10" />
-            </BorderPane.margin>
-        </TableView>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+            <content>
+                <TilePane fx:id="itemGridPane" hgap="10" vgap="10" style="-fx-padding: 10;" />
+            </content>
+        </ScrollPane>
     </center>
-    <bottom>
-        <HBox alignment="CENTER_RIGHT" spacing="10.0" BorderPane.alignment="CENTER">
-            <children>
-                <Button fx:id="addButton" mnemonicParsing="false" onAction="#handleAddItem" text="%items.button.add" />
-                <Button fx:id="editButton" mnemonicParsing="false" onAction="#handleEditItem" text="%items.button.edit" />
-                <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#handleDeleteItem" text="%items.button.delete" />
-            </children>
-            <BorderPane.margin>
-                <Insets bottom="10" left="10" right="10" top="10" />
-            </BorderPane.margin>
-        </HBox>
-    </bottom>
 </BorderPane>

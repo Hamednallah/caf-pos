@@ -4,6 +4,8 @@ import com.yourcompany.cafeteria.dao.ExpensesDAO;
 import com.yourcompany.cafeteria.dao.OrdersDAO;
 import com.yourcompany.cafeteria.dao.ReportsDAO;
 import com.yourcompany.cafeteria.dao.ShiftsDAO;
+import com.yourcompany.cafeteria.model.DateRangeReport;
+import com.yourcompany.cafeteria.model.ShiftReport;
 import com.yourcompany.cafeteria.model.ShiftSummary;
 
 import java.math.BigDecimal;
@@ -36,9 +38,9 @@ public class ReportsService {
         summary.setShiftId(shiftId);
 
         // 1. Get Starting Float
-        ResultSet shiftRs = shiftsDAO.getShiftById(shiftId);
-        if (shiftRs.next()) {
-            summary.setStartingFloat(shiftRs.getBigDecimal("starting_float"));
+        com.yourcompany.cafeteria.model.Shift shift = new ShiftsDAO(connection).findById(shiftId);
+        if (shift != null) {
+            summary.setStartingFloat(shift.getStartingFloat());
         } else {
             throw new IllegalStateException("Shift not found with ID: " + shiftId);
         }
@@ -80,11 +82,14 @@ public class ReportsService {
         return summary;
     }
 
-    public com.yourcompany.cafeteria.model.DateRangeReport getDateRangeReport(java.time.LocalDate from, java.time.LocalDate to) throws Exception {
-        return dao.getDateRangeReport(from, to);
+    public ShiftReport getShiftReport(int shiftId) throws Exception {
+        return dao.getShiftReport(shiftId);
     }
 
-    public java.util.Map<java.time.LocalDate, java.math.BigDecimal> getSalesByDay(java.time.LocalDate from, java.time.LocalDate to) throws Exception {
-        return dao.getSalesByDay(from, to);
+    public DateRangeReport getDateRangeReport(LocalDate from, LocalDate to) throws Exception {
+        if (from == null || to == null || from.isAfter(to)) {
+            throw new IllegalArgumentException("Invalid date range.");
+        }
+        return dao.getDateRangeReport(from, to);
     }
 }

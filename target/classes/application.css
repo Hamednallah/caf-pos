@@ -12,8 +12,8 @@
     /* Color Palette - Teal Theme */
     -fx-background: #F7F9FB;
     -fx-surface: #FFFFFF;
-    -fx-primary: #0B7C72;   /* Primary Accent (Teal) - WCAG AA compliant */
-    -fx-primary-dark: #0A6C62; /* Darker accent for hover - WCAG AA compliant */
+    -fx-primary: #0EA5A4;   /* Primary Accent (Teal) */
+    -fx-primary-dark: #0D9488;
     -fx-text-primary: #111827;
     -fx-text-secondary: #6B7280;
     -fx-subtle-border: #E6EEF2;

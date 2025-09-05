@@ -38,6 +38,13 @@ public class ItemsService {
         return categoryDAO.listAll();
     }
 
+    public Category createCategory(Category category) throws Exception {
+        if (category == null || category.getName() == null || category.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Category name cannot be empty.");
+        }
+        return categoryDAO.create(category);
+    }
+
     public Item findById(int id) throws Exception {
         return itemsDAO.findById(id);
     }

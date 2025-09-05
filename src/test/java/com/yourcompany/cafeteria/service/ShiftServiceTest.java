@@ -1,5 +1,6 @@
 package com.yourcompany.cafeteria.service;
 
+import com.yourcompany.cafeteria.model.Shift;
 import com.yourcompany.cafeteria.util.DataSourceProvider;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterEach;
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,29 +42,37 @@ class ShiftServiceTest {
 
     @Test
     void testStartAndEndShift() throws Exception {
-        int cashierId = 1; // Assuming user with ID 1 exists (seeded)
+        int userId = 1; // Assuming user with ID 1 exists (seeded)
         BigDecimal startFloat = new BigDecimal("100.00");
 
-        int shiftId = shiftService.startShift(cashierId, startFloat);
+        int shiftId = shiftService.startShift(userId, startFloat);
         assertTrue(shiftId > 0);
 
-        try (ResultSet rs = shiftService.getActiveShiftForCashier(cashierId)) {
-            assertTrue(rs.next());
-            assertEquals(shiftId, rs.getInt("id"));
-            assertFalse(rs.next());
-        }
+        Shift activeShift = shiftService.getActiveShiftForUser(userId);
+        assertNotNull(activeShift);
+        assertEquals(shiftId, activeShift.getId());
 
-        shiftService.endShift(shiftId);
+        shiftService.endShift(shiftId, new BigDecimal("200.00"));
 
-        try (ResultSet rs = shiftService.getActiveShiftForCashier(cashierId)) {
-            assertFalse(rs.next());
-        }
+        activeShift = shiftService.getActiveShiftForUser(userId);
+        assertNull(activeShift);
     }
 
     @Test
     void testStartShiftWithNegativeFloat() {
         assertThrows(IllegalArgumentException.class, () -> {
             shiftService.startShift(1, new BigDecimal("-50.00"));
+        });
+    }
+
+    @Test
+    void testStartShiftWhenAlreadyActive() throws Exception {
+        int userId = 1;
+        shiftService.startShift(userId, new BigDecimal("100.00"));
+
+        // Try to start another shift for the same user
+        assertThrows(IllegalStateException.class, () -> {
+            shiftService.startShift(userId, new BigDecimal("50.00"));
         });
     }
 }

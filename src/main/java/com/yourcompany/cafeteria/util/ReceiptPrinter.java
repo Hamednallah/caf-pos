@@ -88,31 +88,30 @@ public class ReceiptPrinter {
                .append("------------------------------------------")
                .feedLine()
                .alignLeft()
-               .append("Order ID: " + order.id)
+               .append("Order ID: " + order.getId())
                .feedLine()
-               .append("Cashier: " + order.cashierId)
+               .append("Cashier: " + order.getUserId())
                .feedLine();
 
-        if (order.createdAt != null) {
-            builder.append("Date: " + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(order.createdAt)).feedLine();
+        if (order.getCreatedAt() != null) {
+            builder.append("Date: " + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(order.getCreatedAt())).feedLine();
         }
         builder.append("------------------------------------------").feedLine();
 
-        for (OrderItem item : order.items) {
+        for (OrderItem item : order.getItems()) {
             String itemName = item.getItemName() != null ? item.getItemName() : "Item #" + item.getItemId();
-            BigDecimal pricePerItem = item.getLineTotal().divide(new BigDecimal(item.getQuantity()));
             String itemLine = String.format("%-24s %2d x %5.2f = %6.2f",
                     itemName.length() > 24 ? itemName.substring(0, 24) : itemName,
                     item.getQuantity(),
-                    pricePerItem,
+                    item.getPriceAtPurchase(),
                     item.getLineTotal());
             builder.append(itemLine).feedLine();
         }
 
         builder.append("------------------------------------------").feedLine();
 
-        BigDecimal subtotal = order.totalAmount != null ? order.totalAmount : BigDecimal.ZERO;
-        BigDecimal discount = order.discountAmount != null ? order.discountAmount : BigDecimal.ZERO;
+        BigDecimal subtotal = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+        BigDecimal discount = order.getDiscountAmount() != null ? order.getDiscountAmount() : BigDecimal.ZERO;
         BigDecimal total = subtotal.subtract(discount);
 
         builder.alignRight()

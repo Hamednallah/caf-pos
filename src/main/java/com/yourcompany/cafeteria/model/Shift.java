@@ -2,16 +2,16 @@ package com.yourcompany.cafeteria.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class Shift {
     private int id;
-    private int cashierId;
-    private User cashier;
+    private int userId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private BigDecimal startingFloat;
+    private BigDecimal actualCash;
 
+    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -20,20 +20,12 @@ public class Shift {
         this.id = id;
     }
 
-    public int getCashierId() {
-        return cashierId;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setCashierId(int cashierId) {
-        this.cashierId = cashierId;
-    }
-
-    public User getCashier() {
-        return cashier;
-    }
-
-    public void setCashier(User cashier) {
-        this.cashier = cashier;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public LocalDateTime getStartTime() {
@@ -60,10 +52,11 @@ public class Shift {
         this.startingFloat = startingFloat;
     }
 
-    @Override
-    public String toString() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        String cashierName = (cashier != null) ? cashier.getFullName() : "Unknown";
-        return String.format("Shift #%d - %s (%s)", id, cashierName, startTime.format(formatter));
+    public BigDecimal getActualCash() {
+        return actualCash;
+    }
+
+    public void setActualCash(BigDecimal actualCash) {
+        this.actualCash = actualCash;
     }
 }

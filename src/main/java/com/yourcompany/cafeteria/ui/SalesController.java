@@ -11,12 +11,10 @@ import com.yourcompany.cafeteria.util.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.print.PrinterJob;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
@@ -41,8 +39,6 @@ public class SalesController {
     @FXML private RadioButton cashRadioButton;
     @FXML private RadioButton bankRadioButton;
     @FXML private Button finalizeButton;
-    @FXML private Button removeButton;
-    @FXML private Button changeQuantityButton;
 
     private ItemsService itemsService;
     private OrdersService ordersService;
@@ -149,45 +145,8 @@ public class SalesController {
             newOrderItem.setItemId(item.getId());
             newOrderItem.setItemName(item.getName());
             newOrderItem.setQuantity(1);
-            newOrderItem.setLineTotal(item.getPrice());
+            newOrderItem.setPriceAtPurchase(item.getPrice());
             cart.add(newOrderItem);
-        }
-    }
-
-    @FXML
-    private void handleRemoveItem() {
-        OrderItem selectedItem = cartTable.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            cart.remove(selectedItem);
-        } else {
-            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select an item from the cart to remove.");
-        }
-    }
-
-    @FXML
-    private void handleChangeQuantity() {
-        OrderItem selectedItem = cartTable.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            TextInputDialog dialog = new TextInputDialog(String.valueOf(selectedItem.getQuantity()));
-            dialog.setTitle("Change Quantity");
-            dialog.setHeaderText("Enter the new quantity for " + selectedItem.getItemName());
-            dialog.setContentText("Quantity:");
-
-            dialog.showAndWait().ifPresent(quantityStr -> {
-                try {
-                    int newQuantity = Integer.parseInt(quantityStr);
-                    if (newQuantity > 0) {
-                        selectedItem.setQuantity(newQuantity);
-                        cartTable.refresh();
-                    } else {
-                        showAlert(Alert.AlertType.ERROR, "Invalid Quantity", "Quantity must be greater than zero.");
-                    }
-                } catch (NumberFormatException e) {
-                    showAlert(Alert.AlertType.ERROR, "Invalid Input", "Please enter a valid number.");
-                }
-            });
-        } else {
-            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select an item from the cart to change its quantity.");
         }
     }
 
@@ -225,28 +184,27 @@ public class SalesController {
         }
 
         Order order = new Order();
-        order.cashierId = SessionManager.getCurrentUser().getId();
-        order.shiftId = SessionManager.getCurrentShiftId();
-        order.status = "FINALIZED";
-        order.paymentMethod = selectedPaymentMethod.getText().toUpperCase();
-        order.paymentConfirmed = true;
-        order.items = new ArrayList<>(cart);
-        order.createdAt = LocalDateTime.now();
+        order.setUserId(SessionManager.getCurrentUser().getId());
+        order.setShiftId(SessionManager.getCurrentShiftId());
+        order.setStatus("FINALIZED");
+        order.setPaymentMethod(selectedPaymentMethod.getText().toUpperCase());
+        order.setPaymentConfirmed(true);
+        order.setItems(new ArrayList<>(cart));
+        order.setCreatedAt(LocalDateTime.now());
 
-        order.totalAmount = cart.stream()
+        order.setTotalAmount(cart.stream()
             .map(OrderItem::getLineTotal)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         try {
-             order.discountAmount = new BigDecimal(discountField.getText());
+             order.setDiscountAmount(new BigDecimal(discountField.getText()));
         } catch (NumberFormatException e) {
-             order.discountAmount = BigDecimal.ZERO;
+             order.setDiscountAmount(BigDecimal.ZERO);
         }
 
         try {
             int id = ordersService.create(order);
             showAlert(Alert.AlertType.INFORMATION, "Success", "Order #" + id + " created successfully.");
-            printReceipt(order);
             clearSale();
         } catch (Exception e) {
             showError("Failed to Save Order", "There was an error saving the order to the database.", e.getMessage());
@@ -274,25 +232,5 @@ public class SalesController {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
-    }
-
-    private void printReceipt(Order order) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ReceiptView.fxml"));
-            VBox receiptLayout = loader.load();
-            ReceiptController controller = loader.getController();
-            controller.populateReceipt(order);
-
-            PrinterJob job = PrinterJob.createPrinterJob();
-            if (job != null && job.showPrintDialog(finalizeButton.getScene().getWindow())) {
-                boolean success = job.printPage(receiptLayout);
-                if (success) {
-                    job.endJob();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Printing Error", "Could not print the receipt.", e.getMessage());
-        }
     }
 }

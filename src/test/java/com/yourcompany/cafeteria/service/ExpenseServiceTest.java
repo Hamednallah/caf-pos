@@ -52,7 +52,7 @@ class ExpenseServiceTest {
         expense.setDescription("Office Supplies");
         expense.setCategory("Supplies");
         expense.setShiftId(shiftId);
-        expense.setRecordedBy(1);
+        expense.setUserId(1);
 
         int expenseId = expenseService.recordExpense(expense);
         assertTrue(expenseId > 0);
@@ -97,7 +97,7 @@ class ExpenseServiceTest {
             assertEquals(0, new BigDecimal("25.75").compareTo(rs.getBigDecimal("amount")));
             assertEquals("Coffee beans", rs.getString("description"));
             assertEquals("Inventory", rs.getString("category"));
-            assertEquals(1, rs.getInt("recorded_by"));
+            assertEquals(1, rs.getInt("user_id"));
             assertEquals(shiftId, rs.getInt("shift_id"));
             assertFalse(rs.next());
         }

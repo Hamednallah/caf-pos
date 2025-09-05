@@ -1,10 +1,11 @@
 package com.yourcompany.cafeteria.service;
 
 import com.yourcompany.cafeteria.dao.ShiftsDAO;
+import com.yourcompany.cafeteria.model.Shift;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.util.List;
 
 public class ShiftService {
     private final ShiftsDAO dao;
@@ -13,22 +14,29 @@ public class ShiftService {
         this.dao = new ShiftsDAO(c);
     }
 
-    public int startShift(int cashierId, BigDecimal startingFloat) throws Exception {
+    public int startShift(int userId, BigDecimal startingFloat) throws Exception {
         if (startingFloat == null || startingFloat.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Starting float cannot be negative.");
         }
-        return dao.startShift(cashierId, startingFloat);
+        // Check if user already has an active shift
+        if (dao.getActiveShiftForUser(userId) != null) {
+            throw new IllegalStateException("User already has an active shift.");
+        }
+        return dao.startShift(userId, startingFloat);
     }
 
-    public void endShift(int id) throws Exception {
-        dao.endShift(id);
+    public void endShift(int id, BigDecimal actualCash) throws Exception {
+        if (actualCash == null || actualCash.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Actual cash amount cannot be negative.");
+        }
+        dao.endShift(id, actualCash);
     }
 
-    public ResultSet getActiveShiftForCashier(int cashierId) throws Exception {
-        return dao.getActiveShiftForCashier(cashierId);
+    public Shift getActiveShiftForUser(int userId) throws Exception {
+        return dao.getActiveShiftForUser(userId);
     }
 
-    public java.util.List<com.yourcompany.cafeteria.model.Shift> getAllShifts() throws Exception {
+    public List<Shift> getAllShifts() throws Exception {
         return dao.getAllShifts();
     }
 }
