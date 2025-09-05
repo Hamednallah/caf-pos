@@ -13,5 +13,13 @@
                 <Insets top="10"/>
             </padding>
         </GridPane>
+        <BarChart fx:id="salesChart" title="%dashboard.chart.monthlySales.title">
+            <xAxis>
+                <CategoryAxis label="%dashboard.chart.monthlySales.xAxis" />
+            </xAxis>
+            <yAxis>
+                <NumberAxis label="%dashboard.chart.monthlySales.yAxis" />
+            </yAxis>
+        </BarChart>
     </children>
 </VBox>

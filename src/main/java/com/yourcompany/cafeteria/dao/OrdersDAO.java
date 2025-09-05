@@ -147,4 +147,15 @@ public class OrdersDAO {
             return rs.next() ? rs.getBigDecimal(1) : java.math.BigDecimal.ZERO;
         }
     }
+
+    public java.util.Map<String, java.math.BigDecimal> getSalesByMonth() throws SQLException {
+        java.util.Map<String, java.math.BigDecimal> salesByMonth = new java.util.LinkedHashMap<>();
+        String sql = "SELECT FORMATDATETIME(created_at, 'yyyy-MM') as month, SUM(total_amount) as monthly_total FROM \"order\" WHERE status = 'FINALIZED' GROUP BY month ORDER BY month";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                salesByMonth.put(rs.getString("month"), rs.getBigDecimal("monthly_total"));
+            }
+        }
+        return salesByMonth;
+    }
 }

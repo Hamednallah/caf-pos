@@ -13,6 +13,7 @@ public class DashboardStats {
     private BigDecimal expensesForCurrentMonth;
     private BigDecimal averageDailyExpenses;
     private BigDecimal averageMonthlyExpenses;
+    private Map<String, BigDecimal> salesByMonth;
 
     // Getters and Setters
     public Map<String, Integer> getUserCountsByRole() {
@@ -85,5 +86,13 @@ public class DashboardStats {
 
     public void setAverageMonthlyExpenses(BigDecimal averageMonthlyExpenses) {
         this.averageMonthlyExpenses = averageMonthlyExpenses;
+    }
+
+    public Map<String, BigDecimal> getSalesByMonth() {
+        return salesByMonth;
+    }
+
+    public void setSalesByMonth(Map<String, BigDecimal> salesByMonth) {
+        this.salesByMonth = salesByMonth;
     }
 }

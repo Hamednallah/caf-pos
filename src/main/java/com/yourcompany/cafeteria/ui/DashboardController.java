@@ -7,17 +7,31 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import com.yourcompany.cafeteria.model.DashboardStats;
+import com.yourcompany.cafeteria.service.DashboardService;
+import com.yourcompany.cafeteria.util.DataSourceProvider;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
 
     @FXML
     private GridPane statsGridPane;
+
+    @FXML
+    private BarChart<String, Number> salesChart;
 
     private DashboardService dashboardService;
     private ResourceBundle resources;
@@ -36,6 +50,7 @@ public class DashboardController implements Initializable {
     private void loadStats() throws Exception {
         DashboardStats stats = dashboardService.getDashboardStats();
         populateGrid(stats);
+        populateSalesChart(stats.getSalesByMonth());
     }
 
     private void populateGrid(DashboardStats stats) {
@@ -85,5 +100,22 @@ public class DashboardController implements Initializable {
             return "0.00";
         }
         return String.format("%.2f", value);
+    }
+
+    private void populateSalesChart(Map<String, BigDecimal> salesByMonth) {
+        if (salesChart == null || salesByMonth == null) {
+            return;
+        }
+
+        salesChart.getData().clear();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName(resources.getString("dashboard.chart.monthlySales.series"));
+
+        // The DAO returns a LinkedHashMap which preserves insertion order (ordered by month)
+        for (Map.Entry<String, BigDecimal> entry : salesByMonth.entrySet()) {
+            series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
+        }
+
+        salesChart.setData(FXCollections.observableArrayList(series));
     }
 }

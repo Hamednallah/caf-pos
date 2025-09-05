@@ -31,6 +31,7 @@ public class DashboardService {
         stats.setExpensesForCurrentMonth(expensesDAO.getExpensesForCurrentMonth());
         stats.setAverageDailyExpenses(expensesDAO.getAverageDailyExpenses());
         stats.setAverageMonthlyExpenses(expensesDAO.getAverageMonthlyExpenses());
+        stats.setSalesByMonth(ordersDAO.getSalesByMonth());
 
         return stats;
     }
