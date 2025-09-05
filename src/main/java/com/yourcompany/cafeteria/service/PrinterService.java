@@ -24,14 +24,10 @@ public class PrinterService {
         return printers;
     }
 
-    public void testPrint(String printerName) throws Exception {
+    public void testPrint(String printerName, java.util.ResourceBundle resources) throws Exception {
         String testReceipt = "************************\n" +
-                             "       TEST PRINT       \n" +
-                             "************************\n" +
-                             "This is a test receipt.\n" +
-                             "If you see this, the\n" +
-                             "printer is configured\n" +
-                             "correctly.\n\n\n";
+                             resources.getString("settings.testPrint") + "\n" +
+                             "************************\n";
         ReceiptPrinter.print(printerName, testReceipt.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 }

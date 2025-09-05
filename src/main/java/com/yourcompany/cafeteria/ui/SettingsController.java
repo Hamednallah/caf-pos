@@ -68,7 +68,7 @@ public class SettingsController implements Initializable {
                 statusLabel.setText("Please select a printer first.");
                 return;
             }
-            printerService.testPrint(selectedPrinter);
+            printerService.testPrint(selectedPrinter, resources);
             statusLabel.setText("Test print sent to " + selectedPrinter);
         } catch (Exception e) {
             statusLabel.setText("Failed to send test print.");

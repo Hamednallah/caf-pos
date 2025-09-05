@@ -8,7 +8,9 @@ import javax.print.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 public class ReceiptPrinter {
 
@@ -16,9 +18,9 @@ public class ReceiptPrinter {
      * Formats and prints an order receipt to the default printer using ESC/POS commands.
      * @param order The order to print.
      */
-    public static void print(Order order) {
+    public static void print(Order order, java.util.ResourceBundle resources, java.util.Locale locale) {
         try {
-            byte[] receiptBytes = formatEscPosReceipt(order);
+            byte[] receiptBytes = formatEscPosReceipt(order, resources, locale);
             print(receiptBytes);
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,35 +84,50 @@ public class ReceiptPrinter {
         return names;
     }
 
-    private static byte[] formatEscPosReceipt(Order order) {
+    private static byte[] formatEscPosReceipt(Order order, java.util.ResourceBundle resources, java.util.Locale locale) {
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(locale);
+        DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(locale);
+
         EscPosBuilder builder = new EscPosBuilder();
 
         builder.alignCenter()
                .bold(true)
-               .append("Cafeteria POS")
+               .append(resources.getString("receipt.title"))
                .feedLine()
                .bold(false)
                .append("------------------------------------------")
                .feedLine()
                .alignLeft()
-               .append("Order ID: " + order.id)
+               .append(resources.getString("receipt.orderId") + " " + order.id)
                .feedLine()
-               .append("Cashier: " + order.cashierId)
+               .append(resources.getString("receipt.cashier") + " " + order.cashierId)
                .feedLine();
 
         if (order.createdAt != null) {
-            builder.append("Date: " + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(order.createdAt)).feedLine();
+            builder.append(resources.getString("receipt.date") + " " + dateTimeFormat.format(order.createdAt)).feedLine();
         }
         builder.append("------------------------------------------").feedLine();
 
+        boolean isRtl = locale.getLanguage().equals("ar");
+
         for (OrderItem item : order.items) {
-            String itemName = item.getItemName() != null ? item.getItemName() : "Item #" + item.getItemId();
-            String itemLine = String.format("%-24s %2d x %5.2f = %6.2f",
-                    itemName.length() > 24 ? itemName.substring(0, 24) : itemName,
-                    item.getQuantity(),
-                    item.getPriceAtPurchase(),
-                    item.getLineTotal());
-            builder.append(itemLine).feedLine();
+            String itemName = item.getItemName() != null ? item.getItemName() : resources.getString("receipt.item") + " #" + item.getItemId();
+            String itemLine;
+            if (isRtl) {
+                itemLine = String.format("%s = %s x %2d %-20s",
+                        currencyFormat.format(item.getLineTotal()),
+                        currencyFormat.format(item.getPriceAtPurchase()),
+                        item.getQuantity(),
+                        itemName.length() > 20 ? itemName.substring(0, 20) : itemName);
+                builder.alignRight().append(itemLine).feedLine();
+            } else {
+                itemLine = String.format("%-20s %2d x %s = %s",
+                        itemName.length() > 20 ? itemName.substring(0, 20) : itemName,
+                        item.getQuantity(),
+                        currencyFormat.format(item.getPriceAtPurchase()),
+                        currencyFormat.format(item.getLineTotal()));
+                builder.alignLeft().append(itemLine).feedLine();
+            }
         }
 
         builder.append("------------------------------------------").feedLine();
@@ -119,22 +136,25 @@ public class ReceiptPrinter {
         BigDecimal discount = order.discountAmount != null ? order.discountAmount : BigDecimal.ZERO;
         BigDecimal total = subtotal.subtract(discount);
 
-        builder.alignRight()
-               .append(String.format("Subtotal: %8.2f", subtotal))
-               .feedLine();
-
-        if (discount.compareTo(BigDecimal.ZERO) > 0) {
-            builder.append(String.format("Discount: %8.2f", discount.negate())).feedLine();
+        if (isRtl) {
+            builder.alignLeft();
+            builder.append(currencyFormat.format(subtotal) + " :" + resources.getString("receipt.subtotal")).feedLine();
+            if (discount.compareTo(BigDecimal.ZERO) > 0) {
+                builder.append(currencyFormat.format(discount.negate()) + " :" + resources.getString("receipt.discount")).feedLine();
+            }
+            builder.bold(true).append(currencyFormat.format(total) + " :" + resources.getString("receipt.total")).feedLine().bold(false);
+        } else {
+            builder.alignRight();
+            builder.append(resources.getString("receipt.subtotal") + " " + currencyFormat.format(subtotal)).feedLine();
+            if (discount.compareTo(BigDecimal.ZERO) > 0) {
+                builder.append(resources.getString("receipt.discount") + " " + currencyFormat.format(discount.negate())).feedLine();
+            }
+            builder.bold(true).append(resources.getString("receipt.total") + " " + currencyFormat.format(total)).feedLine().bold(false);
         }
-
-        builder.bold(true)
-               .append(String.format("Total: %8.2f", total))
-               .feedLine()
-               .bold(false);
 
         builder.feedLine()
                .alignCenter()
-               .append("Thank you for your visit!")
+               .append(resources.getString("receipt.thankYou"))
                .feedLines(3)
                .cut();
 

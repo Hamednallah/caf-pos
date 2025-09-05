@@ -272,11 +272,11 @@ public class SalesController implements Initializable {
             } else {
                 order.id = orderIdToEdit;
                 ordersService.updateOrder(order);
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Order #" + order.id + " updated successfully.");
+                showAlert(Alert.AlertType.INFORMATION, resources.getString("sales.success.title"), MessageFormat.format(resources.getString("sales.success.update.message"), order.id));
             }
 
             if (printReceipt) {
-                com.yourcompany.cafeteria.util.ReceiptPrinter.print(order);
+                com.yourcompany.cafeteria.util.ReceiptPrinter.print(order, resources, resources.getLocale());
             }
 
             clearSale();
